@@ -22,8 +22,8 @@ namespace Faithlife.Utility.Tests
 		[TearDown]
 		public void TearDown()
 		{
-			m_stream = null;
-			m_memStream = null;
+			m_stream = null!;
+			m_memStream = null!;
 		}
 
 		[Test]
@@ -38,7 +38,35 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void ConstructorNull()
 		{
-			Assert.Throws<ArgumentNullException>(() => new WrappingStream(null, Ownership.None));
+			Assert.Throws<ArgumentNullException>(() => new WrappingStream(null!, Ownership.None));
+		}
+
+		[Test]
+		public void Close()
+		{
+			Assert.IsTrue(m_stream.CanRead);
+			m_stream.Close();
+			Assert.IsFalse(m_stream.CanRead);
+		}
+
+		[Test]
+		public void CopyTo()
+		{
+			m_stream.Position = 0;
+			using var memoryStream = new MemoryStream();
+			m_stream.CopyTo(memoryStream);
+			Assert.AreEqual(s_abyStreamData.LongLength, m_stream.Position);
+			CollectionAssert.AreEqual(s_abyStreamData, memoryStream.ToArray());
+		}
+
+		[Test]
+		public async Task CopyToAsync()
+		{
+			m_stream.Position = 0;
+			using var memoryStream = new MemoryStream();
+			await m_stream.CopyToAsync(memoryStream).ConfigureAwait(false);
+			Assert.AreEqual(s_abyStreamData.LongLength, m_stream.Position);
+			CollectionAssert.AreEqual(s_abyStreamData, memoryStream.ToArray());
 		}
 
 		[Test]
@@ -54,13 +82,19 @@ namespace Faithlife.Utility.Tests
 			Assert.IsFalse(m_stream.CanSeek);
 			Assert.IsFalse(m_stream.CanWrite);
 
-			Assert.Throws<ObjectDisposedException>(() => { long i = m_stream.Length; });
-			Assert.Throws<ObjectDisposedException>(() => { long i = m_stream.Position; });
+			Assert.Throws<ObjectDisposedException>(() =>
+			{
+				var i = m_stream.Length;
+			});
+			Assert.Throws<ObjectDisposedException>(() =>
+			{
+				var i = m_stream.Position;
+			});
 			Assert.Throws<ObjectDisposedException>(() => { m_stream.Position = 0; });
-			Assert.Throws<ObjectDisposedException>(() => { m_stream.BeginRead(new byte[1], 0, 1, null, null); });
-			Assert.Throws<ObjectDisposedException>(() => { m_stream.EndRead(null); });
-			Assert.Throws<ObjectDisposedException>(() => { m_stream.BeginWrite(new byte[1], 0, 1, null, null); });
-			Assert.Throws<ObjectDisposedException>(() => { m_stream.EndWrite(null); });
+			Assert.Throws<ObjectDisposedException>(() => { m_stream.BeginRead(new byte[1], 0, 1, null!, null); });
+			Assert.Throws<ObjectDisposedException>(() => { m_stream.EndRead(null!); });
+			Assert.Throws<ObjectDisposedException>(() => { m_stream.BeginWrite(new byte[1], 0, 1, null!, null); });
+			Assert.Throws<ObjectDisposedException>(() => { m_stream.EndWrite(null!); });
 			Assert.Throws<ObjectDisposedException>(() => { m_stream.Flush(); });
 			Assert.Throws<ObjectDisposedException>(() => { m_stream.Read(new byte[1], 0, 1); });
 			Assert.Throws<ObjectDisposedException>(() => { m_stream.ReadByte(); });
@@ -86,7 +120,7 @@ namespace Faithlife.Utility.Tests
 		public void Read()
 		{
 			m_stream.Position = 0;
-			byte[] aby = new byte[s_abyStreamData.Length];
+			var aby = new byte[s_abyStreamData.Length];
 			Assert.AreEqual(aby.Length, m_stream.Read(aby, 0, aby.Length));
 			CollectionAssert.AreEqual(s_abyStreamData, aby);
 		}
@@ -95,8 +129,8 @@ namespace Faithlife.Utility.Tests
 		public void BeginRead()
 		{
 			m_stream.Position = 0;
-			byte[] aby = new byte[s_abyStreamData.Length];
-			IAsyncResult ar = m_stream.BeginRead(aby, 0, 8, null, null);
+			var aby = new byte[s_abyStreamData.Length];
+			var ar = m_stream.BeginRead(aby, 0, 8, null!, null);
 			Assert.AreEqual(aby.Length, m_stream.EndRead(ar));
 			CollectionAssert.AreEqual(s_abyStreamData, aby);
 		}
@@ -105,7 +139,7 @@ namespace Faithlife.Utility.Tests
 		public async Task ReadAsync()
 		{
 			m_stream.Position = 0;
-			byte[] aby = new byte[s_abyStreamData.Length];
+			var aby = new byte[s_abyStreamData.Length];
 			Assert.AreEqual(aby.Length, await m_stream.ReadAsync(aby, 0, 8, CancellationToken.None).ConfigureAwait(false));
 			CollectionAssert.AreEqual(s_abyStreamData, aby);
 		}
@@ -155,7 +189,7 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void BeginWrite()
 		{
-			IAsyncResult ar = m_stream.BeginWrite(s_abyStreamData, 0, s_abyStreamData.Length, null, null);
+			var ar = m_stream.BeginWrite(s_abyStreamData, 0, s_abyStreamData.Length, null!, null);
 			m_stream.EndWrite(ar);
 			VerifyWrite();
 		}
@@ -189,15 +223,17 @@ namespace Faithlife.Utility.Tests
 
 			m_stream.Position = 0;
 
-			byte[] aby = new byte[s_abyStreamData.Length * 2];
+			var aby = new byte[s_abyStreamData.Length * 2];
 			m_stream.Read(aby, 0, aby.Length);
 			CollectionAssert.AreEqual(s_abyStreamData, aby.Take(s_abyStreamData.Length));
 			CollectionAssert.AreEqual(s_abyStreamData, aby.Skip(s_abyStreamData.Length));
 		}
 
-		Stream m_memStream;
-		Stream m_stream;
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+		private Stream m_memStream;
+		private Stream m_stream;
+#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
-		static readonly byte[] s_abyStreamData = { 0, 1, 2, 3, 4, 5, 6, 7 };
+		private static readonly byte[] s_abyStreamData = { 0, 1, 2, 3, 4, 5, 6, 7 };
 	}
 }

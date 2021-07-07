@@ -1,17 +1,17 @@
-using System.Collections.Generic;
 using NUnit.Framework;
+#pragma warning disable CS8604 // Possible null reference argument.
 
 namespace Faithlife.Utility.Tests
 {
 	[TestFixture]
-	class EquivalenceTests
+	internal class EquivalenceTests
 	{
 		[Test]
 		public void SimpleTest()
 		{
-			HasEquivalence one = new HasEquivalence { Value = 1 };
-			HasEquivalence oneClone = new HasEquivalence { Value = 1 };
-			HasEquivalence two = new HasEquivalence { Value = 2 };
+			var one = new HasEquivalence { Value = 1 };
+			var oneClone = new HasEquivalence { Value = 1 };
+			var two = new HasEquivalence { Value = 2 };
 
 			Assert.IsFalse(one.IsEquivalentTo(null));
 
@@ -31,9 +31,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void AreEquivalentTests()
 		{
-			HasEquivalence one = new HasEquivalence { Value = 1 };
-			HasEquivalence oneClone = new HasEquivalence { Value = 1 };
-			HasEquivalence two = new HasEquivalence { Value = 2 };
+			var one = new HasEquivalence { Value = 1 };
+			var oneClone = new HasEquivalence { Value = 1 };
+			var two = new HasEquivalence { Value = 2 };
 
 			Assert.AreEqual(Equivalence.AreEquivalent<HasEquivalence>(null, null), true);
 			Assert.AreEqual(Equivalence.AreEquivalent(one, null), false);
@@ -55,9 +55,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void AreSequencesEquivalentTests()
 		{
-			HasEquivalence one = new HasEquivalence { Value = 1 };
-			HasEquivalence oneClone = new HasEquivalence { Value = 1 };
-			HasEquivalence two = new HasEquivalence { Value = 2 };
+			var one = new HasEquivalence { Value = 1 };
+			var oneClone = new HasEquivalence { Value = 1 };
+			var two = new HasEquivalence { Value = 2 };
 
 			Assert.AreEqual(Equivalence.AreSequencesEquivalent<HasEquivalence>(null, null), true);
 			Assert.AreEqual(Equivalence.AreSequencesEquivalent(new HasEquivalence[0], null), false);
@@ -74,15 +74,15 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void UseEqualityComparer()
 		{
-			IEqualityComparer<HasEquivalence> ec = Equivalence.GetEqualityComparer<HasEquivalence>();
+			var ec = Equivalence.GetEqualityComparer<HasEquivalence>();
 
-			HasEquivalence one = new HasEquivalence { Value = 1 };
-			HasEquivalence oneClone = new HasEquivalence { Value = 1 };
-			HasEquivalence two = new HasEquivalence { Value = 2 };
+			var one = new HasEquivalence { Value = 1 };
+			var oneClone = new HasEquivalence { Value = 1 };
+			var two = new HasEquivalence { Value = 2 };
 
-			Assert.AreEqual(ec.Equals(null, null), true);
-			Assert.AreEqual(ec.Equals(one, null), false);
-			Assert.AreEqual(ec.Equals(null, one), false);
+			Assert.AreEqual(ec.Equals(null!, null!), true);
+			Assert.AreEqual(ec.Equals(one, null!), false);
+			Assert.AreEqual(ec.Equals(null!, one), false);
 
 			Assert.AreEqual(ec.Equals(one, one), true);
 			Assert.AreEqual(ec.Equals(one, oneClone), true);
@@ -100,15 +100,15 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void UseEqualityComparerWithFallback()
 		{
-			IEqualityComparer<HasEquivalence> ec = Equivalence.GetEqualityComparerOrFallback<HasEquivalence>();
+			var ec = Equivalence.GetEqualityComparerOrFallback<HasEquivalence>();
 
-			HasEquivalence one = new HasEquivalence { Value = 1 };
-			HasEquivalence oneClone = new HasEquivalence { Value = 1 };
-			HasEquivalence two = new HasEquivalence { Value = 2 };
+			var one = new HasEquivalence { Value = 1 };
+			var oneClone = new HasEquivalence { Value = 1 };
+			var two = new HasEquivalence { Value = 2 };
 
-			Assert.AreEqual(ec.Equals(null, null), true);
-			Assert.AreEqual(ec.Equals(one, null), false);
-			Assert.AreEqual(ec.Equals(null, one), false);
+			Assert.AreEqual(ec.Equals(null!, null!), true);
+			Assert.AreEqual(ec.Equals(one, null!), false);
+			Assert.AreEqual(ec.Equals(null!, one), false);
 
 			Assert.AreEqual(ec.Equals(one, one), true);
 			Assert.AreEqual(ec.Equals(one, oneClone), true);
@@ -126,15 +126,15 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void UseEqualityComparerWithoutEquivalence()
 		{
-			IEqualityComparer<HasNotEquivalence> ec = Equivalence.GetEqualityComparerOrFallback<HasNotEquivalence>();
+			var ec = Equivalence.GetEqualityComparerOrFallback<HasNotEquivalence>();
 
-			HasNotEquivalence one = new HasNotEquivalence { Value = 1 };
-			HasNotEquivalence oneClone = new HasNotEquivalence { Value = 1 };
-			HasNotEquivalence two = new HasNotEquivalence { Value = 2 };
+			var one = new HasNotEquivalence { Value = 1 };
+			var oneClone = new HasNotEquivalence { Value = 1 };
+			var two = new HasNotEquivalence { Value = 2 };
 
-			Assert.AreEqual(ec.Equals(null, null), true);
-			Assert.AreEqual(ec.Equals(one, null), false);
-			Assert.AreEqual(ec.Equals(null, one), false);
+			Assert.AreEqual(ec.Equals(null!, null!), true);
+			Assert.AreEqual(ec.Equals(one, null!), false);
+			Assert.AreEqual(ec.Equals(null!, one), false);
 
 			Assert.AreEqual(ec.Equals(one, one), true);
 			Assert.AreEqual(ec.Equals(one, oneClone), false);
@@ -153,10 +153,7 @@ namespace Faithlife.Utility.Tests
 		{
 			public int Value { get; set; }
 
-			public bool IsEquivalentTo(HasEquivalence other)
-			{
-				return other != null && other.Value == Value;
-			}
+			public bool IsEquivalentTo(HasEquivalence? other) => other is not null && other.Value == Value;
 		}
 
 		private sealed class HasNotEquivalence

@@ -11,9 +11,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void Cancel()
 		{
-			using (CancellationTokenSource source = new CancellationTokenSource())
+			using (var source = new CancellationTokenSource())
 			{
-				CancellationToken token = source.Token;
+				var token = source.Token;
 				Assert.IsFalse(token.IsCancellationRequested);
 				Assert.IsTrue(token.CanBeCanceled);
 
@@ -25,9 +25,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void LinkedToken()
 		{
-			using (CancellationTokenSource source1 = new CancellationTokenSource())
-			using (CancellationTokenSource source2 = new CancellationTokenSource())
-			using (CancellationTokenSource sourceLinked = CancellationTokenSource.CreateLinkedTokenSource(source1.Token, source2.Token, CancellationToken.None))
+			using (var source1 = new CancellationTokenSource())
+			using (var source2 = new CancellationTokenSource())
+			using (var sourceLinked = CancellationTokenSource.CreateLinkedTokenSource(source1.Token, source2.Token, CancellationToken.None))
 			{
 				Assert.IsTrue(source1.Token.CanBeCanceled);
 				Assert.IsTrue(source2.Token.CanBeCanceled);
@@ -38,9 +38,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void Register()
 		{
-			using (CancellationTokenSource source = new CancellationTokenSource())
+			using (var source = new CancellationTokenSource())
 			{
-				bool canceled = false;
+				var canceled = false;
 				using (source.Token.Register(() => canceled = true))
 				{
 					Assert.IsFalse(canceled);
@@ -53,9 +53,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void RegisterCanceled()
 		{
-			using (CancellationTokenSource source = new CancellationTokenSource())
+			using (var source = new CancellationTokenSource())
 			{
-				bool canceled = false;
+				var canceled = false;
 				source.Cancel();
 				using (source.Token.Register(() => canceled = true))
 				{
@@ -63,35 +63,5 @@ namespace Faithlife.Utility.Tests
 				}
 			}
 		}
-
-		// TODO: fix this without using Thread.Sleep()
-		//[Test]
-		//public void DisposeRegistration()
-		//{
-		//	// try to cause CTS.Cancel and CTR.Dispose to run simultaneously; this should not throw
-		//	for (int i = 0; i < 2000; i++)
-		//	{
-		//		m_state = 0;
-		//		using (CancellationTokenSource source = new CancellationTokenSource())
-		//		{
-		//			CancellationTokenRegistration registration = source.Token.Register(() => Thread.Sleep(10));
-
-		//			Task.Run(() =>
-		//			{
-		//				m_state = 1;
-		//				source.Cancel();
-		//				m_state = 2;
-		//			});
-
-		//			while (m_state == 0)
-		//				;
-		//			registration.Dispose();
-		//			while (m_state == 1)
-		//				;
-		//		}
-		//	}
-		//}
-
-		//volatile int m_state;
 	}
 }

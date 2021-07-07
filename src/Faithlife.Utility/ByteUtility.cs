@@ -14,13 +14,13 @@ namespace Faithlife.Utility
 		/// <returns>A byte array containing the bytes represented in the string.</returns>
 		public static byte[] ToBytes(string value)
 		{
-			if (value == null)
+			if (value is null)
 				throw new ArgumentNullException(nameof(value));
 			if (value.Length % 2 != 0)
 				throw new ArgumentException("There must be an even number of characters in the string.", nameof(value));
 
-			byte[] bytes = new byte[value.Length / 2];
-			for (int index = 0; index < bytes.Length; index++)
+			var bytes = new byte[value.Length / 2];
+			for (var index = 0; index < bytes.Length; index++)
 				bytes[index] = (byte) (ConvertToNibble(value[index * 2]) * 16 + ConvertToNibble(value[index * 2 + 1]));
 
 			return bytes;
@@ -33,16 +33,16 @@ namespace Faithlife.Utility
 		/// <returns>A string containing two hexadecimal digits for each input byte.</returns>
 		public static string ToString(byte[] bytes)
 		{
-			if (bytes == null)
+			if (bytes is null)
 				throw new ArgumentNullException(nameof(bytes));
 
 			const string hexDigits = "0123456789ABCDEF";
 
 			// allocate char array and fill it with high and low nibbles of each byte
-			char[] chars = new char[bytes.Length * 2];
-			for (int index = 0; index < chars.Length; index += 2)
+			var chars = new char[bytes.Length * 2];
+			for (var index = 0; index < chars.Length; index += 2)
 			{
-				byte by = bytes[index / 2];
+				var by = bytes[index / 2];
 				chars[index] = hexDigits[by / 16];
 				chars[index + 1] = hexDigits[by % 16];
 			}

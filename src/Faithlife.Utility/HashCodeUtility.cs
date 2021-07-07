@@ -15,7 +15,7 @@ namespace Faithlife.Utility
 		{
 			unchecked
 			{
-				uint n = (uint) value;
+				var n = (uint) value;
 				n = (n + 0x7ed55d16) + (n << 12);
 				n = (n ^ 0xc761c23c) ^ (n >> 19);
 				n = (n + 0x165667b1) + (n << 5);
@@ -36,7 +36,7 @@ namespace Faithlife.Utility
 		{
 			unchecked
 			{
-				ulong n = (ulong) value;
+				var n = (ulong) value;
 				n = (~n) + (n << 18);
 				n = n ^ (n >> 31);
 				n = n * 21;
@@ -68,9 +68,9 @@ namespace Faithlife.Utility
 		{
 			unchecked
 			{
-				uint a = 0xdeadbeef + 4;
-				uint b = a;
-				uint c = a;
+				var a = 0xdeadbeef + 4;
+				var b = a;
+				var c = a;
 
 				a += (uint) hashCode1;
 				FinalizeHash(ref a, ref b, ref c);
@@ -90,9 +90,9 @@ namespace Faithlife.Utility
 		{
 			unchecked
 			{
-				uint a = 0xdeadbeef + 8;
-				uint b = a;
-				uint c = a;
+				var a = 0xdeadbeef + 8;
+				var b = a;
+				var c = a;
 
 				a += (uint) hashCode1;
 				b += (uint) hashCode2;
@@ -114,9 +114,9 @@ namespace Faithlife.Utility
 		{
 			unchecked
 			{
-				uint a = 0xdeadbeef + 12;
-				uint b = a;
-				uint c = a;
+				var a = 0xdeadbeef + 12;
+				var b = a;
+				var c = a;
 
 				a += (uint) hashCode1;
 				b += (uint) hashCode2;
@@ -140,9 +140,9 @@ namespace Faithlife.Utility
 		{
 			unchecked
 			{
-				uint a = 0xdeadbeef + 16;
-				uint b = a;
-				uint c = a;
+				var a = 0xdeadbeef + 16;
+				var b = a;
+				var c = a;
 
 				a += (uint) hashCode1;
 				b += (uint) hashCode2;
@@ -163,21 +163,21 @@ namespace Faithlife.Utility
 		/// <returns>The combined hash code.</returns>
 		/// <remarks>This method is based on the "hashword" function at http://burtleburtle.net/bob/c/lookup3.c. It attempts to thoroughly
 		/// mix all the bits in the input hash codes.</remarks>
-		public static int CombineHashCodes(params int[] hashCodes)
+		public static int CombineHashCodes(params int[]? hashCodes)
 		{
 			unchecked
 			{
 				// check for null
-				if (hashCodes == null)
+				if (hashCodes is null)
 					return 0x0d608219;
 
-				int nLength = hashCodes.Length;
+				var nLength = hashCodes.Length;
 
-				uint a = 0xdeadbeef + (((uint) nLength) << 2);
-				uint b = a;
-				uint c = a;
+				var a = 0xdeadbeef + (((uint) nLength) << 2);
+				var b = a;
+				var c = a;
 
-				int nIndex = 0;
+				var nIndex = 0;
 				while (nLength - nIndex > 3)
 				{
 					a += (uint) hashCodes[nIndex];

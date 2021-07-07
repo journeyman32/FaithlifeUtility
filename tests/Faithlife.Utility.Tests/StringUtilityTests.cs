@@ -11,17 +11,6 @@ namespace Faithlife.Utility.Tests
 	[TestFixture]
 	public class StringUtilityTests
 	{
-		[TestCase("", 'a', false)]
-		[TestCase("", '\u0000', false)]
-		[TestCase("a", 'a', true)]
-		[TestCase("ab", 'a', false)]
-		[TestCase("aaaaaaaaaab", 'a', false)]
-		[TestCase("aaaaaaaaaab", 'b', true)]
-		public void EndsWith(string str, char ch, bool expected)
-		{
-			Assert.AreEqual(expected, str.EndsWith(ch));
-		}
-
 		[Test]
 		public void OrdinalStringComparisonExtensionMethods()
 		{
@@ -59,9 +48,16 @@ namespace Faithlife.Utility.Tests
 		}
 
 		[Test]
+		public void ReplaceWithOrdinal()
+		{
+			Assert.AreEqual("abcde", "axe".ReplaceOrdinal("x", "bcd"));
+			Assert.AreEqual("axe", "axe".ReplaceOrdinal("X", "bcd"));
+		}
+
+		[Test]
 		public void FormatInvariant()
 		{
-			DateTime dtNow = DateTime.Now;
+			var dtNow = DateTime.Now;
 			Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, "{0}!", dtNow),
 				StringUtility.FormatInvariant("{0}!", dtNow));
 		}
@@ -69,7 +65,7 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void JoinStrings()
 		{
-			LinkedList<string> linked = new LinkedList<string>();
+			var linked = new LinkedList<string?>();
 			linked.AddLast("one");
 			linked.AddLast(default(string));
 			linked.AddLast("two");
@@ -82,35 +78,35 @@ namespace Faithlife.Utility.Tests
 			Assert.AreEqual("onetwothree", linked.Join(null));
 		}
 
-		[TestCase(0, new string[0])]
-		[TestCase(1, new string[] { null })]
-		[TestCase(2, new[] { null, "one", null, "", "three" })]
-		[TestCase(3, new[] { "one" })]
-		[TestCase(4, new[] { "one", "two", "three" })]
-		public void JoinStringsInEnumerable(int nIgnored, string[] astrStrings)
+		[TestCase(0, new string?[0])]
+		[TestCase(1, new string?[] { null })]
+		[TestCase(2, new string?[] { null, "one", null, "", "three" })]
+		[TestCase(3, new string?[] { "one" })]
+		[TestCase(4, new string?[] { "one", "two", "three" })]
+		public void JoinStringsInEnumerable(int nIgnored, string?[] astrStrings)
 		{
 			const string strSeparator = ", ";
-			string strActual = ((IEnumerable<string>) astrStrings).Join(strSeparator);
+			var strActual = ((IEnumerable<string?>) astrStrings).Join(strSeparator);
 			Assert.AreEqual(string.Join(strSeparator, astrStrings), strActual);
-			strActual = ((IEnumerable<string>) astrStrings).Join();
+			strActual = ((IEnumerable<string?>) astrStrings).Join();
 			Assert.AreEqual(string.Join(string.Empty, astrStrings), strActual);
-			strActual = ((IEnumerable<string>) astrStrings).Join(string.Empty);
+			strActual = ((IEnumerable<string?>) astrStrings).Join(string.Empty);
 			Assert.AreEqual(string.Join(string.Empty, astrStrings), strActual);
-			strActual = ((IEnumerable<string>) astrStrings).Join(null);
+			strActual = ((IEnumerable<string?>) astrStrings).Join(null);
 			Assert.AreEqual(string.Join(null, astrStrings), strActual);
 		}
 
 		[Test]
 		public void JoinStringsNull()
 		{
-			string[] nullStrings = null;
-			Assert.Throws<ArgumentNullException>(() => nullStrings.Join(", "));
+			string?[]? nullStrings = null;
+			Assert.Throws<ArgumentNullException>(() => nullStrings!.Join(", "));
 		}
 
 		[Test]
 		public void JoinFormat()
 		{
-			string[] strings = new[] { "one", "two", "three" };
+			var strings = new[] { "one", "two", "three" };
 			Assert.AreEqual("one, two, three", strings.JoinFormat("{0}, {1}"));
 			Assert.AreEqual("three, two, one", strings.JoinFormat("{1}, {0}"));
 			Assert.AreEqual("((one, two), three)", strings.JoinFormat("({0}, {1})"));
@@ -119,7 +115,7 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void JoinIntegers()
 		{
-			LinkedList<int> linked = new LinkedList<int>();
+			var linked = new LinkedList<int>();
 			linked.AddLast(1);
 			linked.AddLast(2);
 			linked.AddLast(3);
@@ -129,7 +125,7 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void JoinSquares()
 		{
-			LinkedList<int> linked = new LinkedList<int>();
+			var linked = new LinkedList<int>();
 			linked.AddLast(1);
 			linked.AddLast(2);
 			linked.AddLast(3);
@@ -146,7 +142,7 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void ReverseNull()
 		{
-			Assert.Throws<ArgumentNullException>(() => StringUtility.Reverse(null));
+			Assert.Throws<ArgumentNullException>(() => StringUtility.Reverse(null!));
 		}
 
 		[TestCase("", "")]
@@ -164,11 +160,11 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void ReverseNonBmp()
 		{
-			int[] anCodePoints = new int[] { 0x10380, 0x10381, 0x10382, 0x1039F };
+			var anCodePoints = new int[] { 0x10380, 0x10381, 0x10382, 0x1039F };
 
-			StringBuilder sbForward = new StringBuilder();
-			StringBuilder sbReversed = new StringBuilder();
-			for (int nIndex = 0; nIndex < anCodePoints.Length; ++nIndex)
+			var sbForward = new StringBuilder();
+			var sbReversed = new StringBuilder();
+			for (var nIndex = 0; nIndex < anCodePoints.Length; ++nIndex)
 			{
 				sbForward.Append(char.ConvertFromUtf32(anCodePoints[nIndex]));
 				sbReversed.Append(char.ConvertFromUtf32(anCodePoints[anCodePoints.Length - nIndex - 1]));
@@ -176,22 +172,6 @@ namespace Faithlife.Utility.Tests
 
 			Assert.AreEqual(sbReversed.ToString(), StringUtility.Reverse(sbForward.ToString()));
 		}
-
-		// TODO: is this a valid test?
-		//#if !__MOBILE__
-		//		// The Mono C# compiler has a fit with these strings for reasons
-		//		// that have yet to be investigated.
-		//		[TestCase("\uD800", "\uD800")]
-		//		[TestCase("Z\uD800", "\uD800Z")]
-		//		[TestCase("Z\uD800\uD801", "\uD801\uD800Z")]
-		//		[TestCase("Z\uD800\uDC00\uDC01", "\uDC01\uD800\uDC00Z")]
-		//		public void ReverseMalformed(string strInput, string strReversed)
-		//		{
-		//			Assert.AreEqual(strReversed, StringUtility.Reverse(strInput));
-		//			Assert.AreEqual(strInput, StringUtility.Reverse(strReversed));
-		//			Assert.AreEqual(strInput, StringUtility.Reverse(StringUtility.Reverse(strInput)));
-		//		}
-		//#endif
 
 		[TestCase(null, "", -1)]
 		[TestCase(null, null, 0)]
@@ -206,8 +186,8 @@ namespace Faithlife.Utility.Tests
 		[TestCase("\uE001", "\uD800\uDF80", -1)]
 		public void CompareByCodePoint(string strOne, string strTwo, int nExpectedResult)
 		{
-			int nActual12 = StringUtility.CompareByCodePoint(strOne, strTwo);
-			int nActual21 = StringUtility.CompareByCodePoint(strTwo, strOne);
+			var nActual12 = StringUtility.CompareByCodePoint(strOne, strTwo);
+			var nActual21 = StringUtility.CompareByCodePoint(strTwo, strOne);
 
 			if (nExpectedResult < 0)
 			{
@@ -226,21 +206,21 @@ namespace Faithlife.Utility.Tests
 			}
 		}
 
-		// Latin
+		//// Latin
 		[TestCase("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")]
 		[TestCase("ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ", "àáâãäåæçèéêëìíîï")]
 		[TestCase("ÐÑÒÓÔÕÖØÙÚÛÜÝÞ", "ðñòóôõöøùúûüýþ")]
 		[TestCase("SSßss", "ssssss")]
 		[TestCase("µ", "μ")]
 		[TestCase("ſ", "s")]
-		// Latin ligatures
+		//// Latin ligatures
 		[TestCase("ﬀﬁﬂﬃﬄﬅﬆ", "fffiflffifflstst")]
 		[TestCase("Ǆǅǆ", "ǆǆǆ")]
 		[TestCase("Ǳǲǳ", "ǳǳǳ")]
 		[TestCase("Ǉǈǉ", "ǉǉǉ")]
 		[TestCase("Ǌǋǌ", "ǌǌǌ")]
 		[TestCase("J̌ǰǰ", "ǰǰǰ")]
-		// extended Latin and IPA
+		//// extended Latin and IPA
 		[TestCase("ĀĂĄĆĈĊČĎĐĒĔĖĘĚĜĞĠĢĤĦĨĪĬĮİĲĴĶĹĻĽĿŁ", "āăąćĉċčďđēĕėęěĝğġģĥħĩīĭįi̇ĳĵķĺļľŀł")]
 		[TestCase("ŃŅŇŊŌŎŐŒŔŖŘŚŜŞŠŢŤŦŨŪŬŮŰŲŴŶŸŹŻŽ", "ńņňŋōŏőœŕŗřśŝşšţťŧũūŭůűųŵŷÿźżž")]
 		[TestCase("ŉ", "ʼn")]
@@ -260,7 +240,7 @@ namespace Faithlife.Utility.Tests
 		[TestCase("ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫⅬⅭⅮⅯↃ", "ⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻⅼⅽⅾⅿↄ")]
 		[TestCase("ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ", "ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ")]
 		[TestCase("ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ", "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ")]
-		// Greek
+		//// Greek
 		[TestCase("ᾼᾼΑιᾳᾳαι", "αιαιαιαιαιαι")]
 		[TestCase("ΆΈΉΊΌΎΏΪΫ", "άέήίόύώϊϋ")]
 		[TestCase("ΐΰΐΰ", "ΐΰΐΰ")]
@@ -286,26 +266,26 @@ namespace Faithlife.Utility.Tests
 		[TestCase("ῒΐῖῗῘῙῚΊ", "ῒΐῖῗῐῑὶί")]
 		[TestCase("ῢΰῤῦῧῨῩῪΎῬ", "ῢΰῤῦῧῠῡὺύῥ")]
 		[TestCase("ῲῳῴῶῷῸΌῺΏῼ", "ὼιωιώιῶῶιὸόὼώωι")]
-		// Coptic
+		//// Coptic
 		[TestCase("ϢϤϦϨϪϬϮ", "ϣϥϧϩϫϭϯ")]
 		[TestCase("ⲀⲂⲄⲆⲈⲊⲌⲎⲐⲒⲔⲖⲘⲚⲜⲞⲠⲢⲤⲦⲨⲪⲬⲮⲰⲲⲴⲶⲸⲺⲼⲾⳀⳂⳄⳆⳈⳊⳌⳎⳐⳒⳔⳖⳘⳚⳜⳞⳠⳢ", "ⲁⲃⲅⲇⲉⲋⲍⲏⲑⲓⲕⲗⲙⲛⲝⲟⲡⲣⲥⲧⲩⲫⲭⲯⲱⲳⲵⲷⲹⲻⲽⲿⳁⳃⳅⳇⳉⳋⳍⳏⳑⳓⳕⳗⳙⳛⳝⳟⳡⳣ")]
-		// Cyrillic
+		//// Cyrillic
 		[TestCase("АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ", "абвгдежзийклмнопрстуфхцчшщъыьэюя")]
 		[TestCase("ЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏ", "ѐёђѓєѕіїјљњћќѝўџ")]
 		[TestCase("ѠѢѤѦѨѪѬѮѰѲѴѶѸѺѼѾҀ", "ѡѣѥѧѩѫѭѯѱѳѵѷѹѻѽѿҁ")]
 		[TestCase("ҊҌҎҐҒҔҖҘҚҜҞҠҢҤҦҨҪҬҮҰҲҴҶҸҺҼҾ", "ҋҍҏґғҕҗҙқҝҟҡңҥҧҩҫҭүұҳҵҷҹһҽҿ")]
 		[TestCase("ӀӁӃӅӇӉӋӍӐӒӔӖӘӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԀԂԄԆԈԊԌԎԐԒ", "ӏӂӄӆӈӊӌӎӑӓӕӗәӛӝӟӡӣӥӧөӫӭӯӱӳӵӷӹӻӽӿԁԃԅԇԉԋԍԏԑԓ")]
-		// Armenian
+		//// Armenian
 		[TestCase("ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖ", "աբգդեզէըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆ")]
 		[TestCase("և", "եւ")]
 		[TestCase("ﬓﬔﬕﬖﬗ", "մնմեմիվնմխ")]
-		// Georgian
+		//// Georgian
 		[TestCase("ႠႡႢႣႤႥႦႧႨႩႪႫႬႭႮႯႰႱႲႳႴႵႶႷႸႹႺႻႼႽႾႿჀჁჂჃჄჅ", "ⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠⴡⴢⴣⴤⴥ")]
-		// Glagolitic
+		//// Glagolitic
 		[TestCase("ⰀⰁⰂⰃⰄⰅⰆⰇⰈⰉⰊⰋⰌⰍⰎⰏⰐⰑⰒⰓⰔⰕⰖⰗⰘⰙⰚⰛⰜⰝⰞⰟⰠⰡⰢⰣⰤⰥⰦⰧⰨⰩⰪⰫⰬⰭⰮ", "ⰰⰱⰲⰳⰴⰵⰶⰷⰸⰹⰺⰻⰼⰽⰾⰿⱀⱁⱂⱃⱄⱅⱆⱇⱈⱉⱊⱋⱌⱍⱎⱏⱐⱑⱒⱓⱔⱕⱖⱗⱘⱙⱚⱛⱜⱝⱞ")]
-		// Hebrew (uncased)
+		//// Hebrew (uncased)
 		[TestCase("אבגדהוזחטיךכלםמןנסעףפץצקרשת", "אבגדהוזחטיךכלםמןנסעףפץצקרשת")]
-		// Syriac (uncased)
+		//// Syriac (uncased)
 		[TestCase("ܐܑܒܓܔܕܖܗܘܙܚܛܜܝܞܟܠܡܢܣܤܥܦܧܨܩܪܫܬ", "ܐܑܒܓܔܕܖܗܘܙܚܛܜܝܞܟܠܡܢܣܤܥܦܧܨܩܪܫܬ")]
 		public void FoldCase(string strInput, string strExpected)
 		{
@@ -319,7 +299,7 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void FoldCaseNull()
 		{
-			Assert.Throws<ArgumentNullException>(() => StringUtility.FoldCase(null));
+			Assert.Throws<ArgumentNullException>(() => StringUtility.FoldCase(null!));
 		}
 
 		[TestCase("", 0)]
@@ -332,7 +312,7 @@ namespace Faithlife.Utility.Tests
 		[TestCase("abcabca", 451022788)]
 		[TestCase("\" \"", 1671599841)]
 		[TestCase("#@!", 1671599841)]
-		public void GetPersistentHash(string s, int nExpected)
+		public void GetPersistentHash(string? s, int nExpected)
 		{
 			Assert.AreEqual(nExpected, StringUtility.GetPersistentHashCode(s));
 		}
@@ -341,9 +321,9 @@ namespace Faithlife.Utility.Tests
 		[TestCase("")]
 		[TestCase("1")]
 		[TestCase("ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ")]
-		public void CompressAndDecompress(string text)
+		public void CompressAndDecompress(string? text)
 		{
-			byte[] bytes = StringUtility.Compress(text);
+			var bytes = StringUtility.Compress(text);
 			Assert.AreEqual(StringUtility.Decompress(bytes), text);
 		}
 
@@ -351,20 +331,20 @@ namespace Faithlife.Utility.Tests
 		public void CompressAndDecompressShortString()
 		{
 			const string text = "1234";
-			byte[] bytes = StringUtility.Compress(text);
-			Assert.AreEqual(bytes[0], (byte) 2);
+			var bytes = StringUtility.Compress(text);
+			Assert.AreEqual(bytes![0], (byte) 2);
 			Assert.AreEqual(StringUtility.Decompress(bytes), text);
 		}
 
 		[Test]
 		public void CompressAndDecompressLongString()
 		{
-			StringBuilder textBuilder = new StringBuilder();
-			for (int i = 0; i < 100000; i++)
+			var textBuilder = new StringBuilder();
+			for (var i = 0; i < 100000; i++)
 				textBuilder.AppendLine(Guid.NewGuid().ToString());
-			string text = textBuilder.ToString();
-			byte[] bytes = StringUtility.Compress(text);
-			Assert.AreEqual(bytes[0], (byte) 1);
+			var text = textBuilder.ToString();
+			var bytes = StringUtility.Compress(text);
+			Assert.AreEqual(bytes![0], (byte) 1);
 			Assert.AreEqual(StringUtility.Decompress(bytes), text);
 		}
 
@@ -373,9 +353,9 @@ namespace Faithlife.Utility.Tests
 		[TestCase("02-01-00-00-00-31", "1")]
 		[TestCase("01-00-00-00-00", "")]
 		[TestCase("02-00-00-00-00", "")]
-		public void Decompress(string data, string text)
+		public void Decompress(string? data, string? text)
 		{
-			byte[] bytes = data == null ? null :
+			var bytes = data == null ? null :
 				data.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries).Select(x => byte.Parse(x, NumberStyles.HexNumber)).ToArray();
 			Assert.AreEqual(StringUtility.Decompress(bytes), text);
 		}
@@ -384,9 +364,9 @@ namespace Faithlife.Utility.Tests
 		[TestCase("03-00-00-00-00", null)]
 		[TestCase("01-00-00", null)]
 		[TestCase("01-00-00-00-01-00", "")]
-		public void DecompressFormatException(string data, string text)
+		public void DecompressFormatException(string? data, string? text)
 		{
-			byte[] bytes = data == null ? null :
+			var bytes = data == null ? null :
 				data.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries).Select(x => byte.Parse(x, NumberStyles.HexNumber)).ToArray();
 			Assert.Throws<FormatException>(() => StringUtility.Decompress(bytes));
 		}
@@ -394,9 +374,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void CompressionTextWriterAndTextReader()
 		{
-			using (MemoryStream stream = new MemoryStream())
+			using (var stream = new MemoryStream())
 			{
-				using (TextWriter textWriter = StringUtility.CreateCompressingTextWriter(stream, Ownership.None))
+				using (var textWriter = StringUtility.CreateCompressingTextWriter(stream, Ownership.None))
 				{
 					textWriter.Write('a');
 					textWriter.Write(new[] { 'b', 'c', 'd' });
@@ -408,9 +388,9 @@ namespace Faithlife.Utility.Tests
 				stream.Flush();
 				stream.Position = 0;
 
-				using (TextReader textReader = StringUtility.CreateDecompressingTextReader(stream, Ownership.None))
+				using (var textReader = StringUtility.CreateDecompressingTextReader(stream, Ownership.None))
 				{
-					char[] buffer = new char[5];
+					var buffer = new char[5];
 					textReader.ReadBlock(buffer, 1, 3);
 					CollectionAssert.AreEqual(buffer, new[] { default(char), 'a', 'b', 'c', default(char) });
 					Assert.AreEqual(textReader.Read(), 'd');

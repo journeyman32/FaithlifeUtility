@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Faithlife.Utility
@@ -14,7 +15,8 @@ namespace Faithlife.Utility
 		/// </summary>
 		/// <param name="value">The string to encode.</param>
 		/// <returns>The encoded string.</returns>
-		public static string Encode(string value) => Encode(value, s_settingsDefault);
+		[return: NotNullIfNotNull("value")]
+		public static string? Encode(string? value) => Encode(value, s_settingsDefault);
 
 		/// <summary>
 		/// Encodes a string with the specified settings.
@@ -22,14 +24,15 @@ namespace Faithlife.Utility
 		/// <param name="value">The string to encode.</param>
 		/// <param name="settings">The settings to use when encoding.</param>
 		/// <returns>The encoded string.</returns>
-		public static string Encode(string value, UrlEncodingSettings settings)
+		[return: NotNullIfNotNull("value")]
+		public static string? Encode(string? value, UrlEncodingSettings settings)
 		{
 			// check arguments
-			if (settings == null)
+			if (settings is null)
 				throw new ArgumentNullException(nameof(settings));
 
 			// null encodes to null
-			if (value == null)
+			if (value is null)
 				return null;
 
 			// empty string encodes to empty string
@@ -37,12 +40,12 @@ namespace Faithlife.Utility
 				return value;
 
 			// convert string to array of characters
-			char[] chars = value.ToCharArray();
-			int length = chars.Length;
+			var chars = value.ToCharArray();
+			var length = chars.Length;
 
 			// count characters that should be encoded and spaces
-			int charsToEncode = 0;
-			for (int index = 0; index < length; index++)
+			var charsToEncode = 0;
+			for (var index = 0; index < length; index++)
 			{
 				if (ShouldEncodeChar(settings, chars, index))
 					charsToEncode++;
@@ -53,20 +56,20 @@ namespace Faithlife.Utility
 				return value;
 
 			// each byte becomes 3 characters
-			Encoding encoding = settings.TextEncoding;
-			char[] output = new char[length + 3 * settings.TextEncoding.GetMaxByteCount(charsToEncode)];
-			int outputChar = 0;
+			var encoding = settings.TextEncoding;
+			var output = new char[length + 3 * settings.TextEncoding.GetMaxByteCount(charsToEncode)];
+			var outputChar = 0;
 
 			// walk characters
-			char? encodedSpaceChar = settings.EncodedSpaceChar;
-			char encodedBytePrefixChar = settings.EncodedBytePrefixChar;
-			int encodeStart = 0;
-			int encodeLength = 0;
-			for (int index = 0; index < length; index++)
+			var encodedSpaceChar = settings.EncodedSpaceChar;
+			var encodedBytePrefixChar = settings.EncodedBytePrefixChar;
+			var encodeStart = 0;
+			var encodeLength = 0;
+			for (var index = 0; index < length; index++)
 			{
 				// determine if character needs to be encoded
-				bool shouldEncode = ShouldEncodeChar(settings, chars, index);
-				bool encodingSpaceChar = shouldEncode && chars[index] == ' ' && encodedSpaceChar.HasValue;
+				var shouldEncode = ShouldEncodeChar(settings, chars, index);
+				var encodingSpaceChar = shouldEncode && chars[index] == ' ' && encodedSpaceChar.HasValue;
 
 				// determine if the next character doesn't need text encoding
 				if (!shouldEncode || encodingSpaceChar)
@@ -74,7 +77,7 @@ namespace Faithlife.Utility
 					// encode any characters that needed text encoding
 					if (encodeLength != 0)
 					{
-						foreach (byte by in encoding.GetBytes(chars, encodeStart, encodeLength))
+						foreach (var by in encoding.GetBytes(chars, encodeStart, encodeLength))
 						{
 							output[outputChar++] = encodedBytePrefixChar;
 							output[outputChar++] = HexChar((by >> 4) & 0xf, settings);
@@ -88,7 +91,7 @@ namespace Faithlife.Utility
 				if (encodingSpaceChar)
 				{
 					// encode space character directly
-					output[outputChar++] = encodedSpaceChar.Value;
+					output[outputChar++] = encodedSpaceChar!.Value;
 				}
 				else if (shouldEncode)
 				{
@@ -107,7 +110,7 @@ namespace Faithlife.Utility
 			// encode any characters that needed text encoding
 			if (encodeLength != 0)
 			{
-				foreach (byte by in encoding.GetBytes(chars, encodeStart, encodeLength))
+				foreach (var by in encoding.GetBytes(chars, encodeStart, encodeLength))
 				{
 					output[outputChar++] = encodedBytePrefixChar;
 					output[outputChar++] = HexChar((by >> 4) & 0xf, settings);
@@ -124,7 +127,8 @@ namespace Faithlife.Utility
 		/// </summary>
 		/// <param name="value">The string to be decoded.</param>
 		/// <returns>The decoded string.</returns>
-		public static string Decode(string value) => Decode(value, s_settingsDefault);
+		[return: NotNullIfNotNull("value")]
+		public static string? Decode(string? value) => Decode(value, s_settingsDefault);
 
 		/// <summary>
 		/// Decodes a string with the specified settings.
@@ -132,14 +136,15 @@ namespace Faithlife.Utility
 		/// <param name="value">The string to be decoded.</param>
 		/// <param name="settings">The settings to use when decoding.</param>
 		/// <returns>The decoded string.</returns>
-		public static string Decode(string value, UrlEncodingSettings settings)
+		[return: NotNullIfNotNull("value")]
+		public static string? Decode(string? value, UrlEncodingSettings settings)
 		{
 			// check arguments
-			if (settings == null)
+			if (settings is null)
 				throw new ArgumentNullException(nameof(settings));
 
 			// null decodes to null
-			if (value == null)
+			if (value is null)
 				return null;
 
 			// empty string decodes to empty string
@@ -151,7 +156,7 @@ namespace Faithlife.Utility
 				value = value.Replace(settings.EncodedSpaceChar.Value, ' ');
 
 			// decode hex-encoded characters
-			return value.IndexOf(settings.EncodedBytePrefixChar) == -1 ? value : DecodeHex(value, settings);
+			return value.IndexOfOrdinal(settings.EncodedBytePrefixChar) == -1 ? value : DecodeHex(value, settings);
 		}
 
 		private static string DecodeHex(string str, UrlEncodingSettings settings)
@@ -160,12 +165,12 @@ namespace Faithlife.Utility
 			var outputIndex = 0;
 			var singleByteArray = new byte[1];
 			var decoder = settings.TextEncoding.GetDecoder();
-			var isUtf8 = object.ReferenceEquals(settings.TextEncoding, Encoding.UTF8);
+			var isUtf8 = ReferenceEquals(settings.TextEncoding, Encoding.UTF8);
 
 			// walk the string, looking for the prefix character
-			for (int index = 0; index < str.Length; index++)
+			for (var index = 0; index < str.Length; index++)
 			{
-				char ch = str[index];
+				var ch = str[index];
 				if (index < str.Length - 2 && ch == settings.EncodedBytePrefixChar && IsCharHex(str[index + 1]) && IsCharHex(str[index + 2]))
 				{
 					// found two hex characters; add their byte value to the buffer
@@ -233,7 +238,7 @@ namespace Faithlife.Utility
 
 		private static bool ShouldEncodeChar(UrlEncodingSettings settings, char[] chars, int index)
 		{
-			char ch = chars[index];
+			var ch = chars[index];
 
 			// the char should be encoded if the user-supplied function indicates it should
 			if (settings.ShouldEncodeChar(ch))
@@ -252,6 +257,6 @@ namespace Faithlife.Utility
 				!(settings.PreventDoubleEncoding && index + 2 < chars.Length && IsCharHex(chars[index + 1]) && IsCharHex(chars[index + 2]));
 		}
 
-		static readonly UrlEncodingSettings s_settingsDefault = new UrlEncodingSettings();
+		private static readonly UrlEncodingSettings s_settingsDefault = new UrlEncodingSettings();
 	}
 }

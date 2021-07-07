@@ -9,10 +9,10 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void OperatorEquality()
 		{
-			EquatableClass eNull = null;
-			EquatableClass e1 = new EquatableClass(1);
-			EquatableClass e1b = new EquatableClass(1);
-			EquatableClass e2 = new EquatableClass(2);
+			EquatableClass? eNull = null;
+			var e1 = new EquatableClass(1);
+			var e1b = new EquatableClass(1);
+			var e2 = new EquatableClass(2);
 
 			Assert.IsTrue(ObjectImpl.OperatorEquality(eNull, null));
 			Assert.IsTrue(ObjectImpl.OperatorEquality(e1, e1));
@@ -25,10 +25,10 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void OperatorInequality()
 		{
-			EquatableClass eNull = null;
-			EquatableClass e1 = new EquatableClass(1);
-			EquatableClass e1b = new EquatableClass(1);
-			EquatableClass e2 = new EquatableClass(2);
+			EquatableClass? eNull = null;
+			var e1 = new EquatableClass(1);
+			var e1b = new EquatableClass(1);
+			var e2 = new EquatableClass(2);
 
 			Assert.IsFalse(ObjectImpl.OperatorInequality(eNull, null));
 			Assert.IsFalse(ObjectImpl.OperatorInequality(e1, e1));
@@ -45,12 +45,12 @@ namespace Faithlife.Utility.Tests
 				m_i = i;
 			}
 
-			public bool Equals(EquatableClass other)
+			public bool Equals(EquatableClass? other)
 			{
 				return other != null && m_i == other.m_i;
 			}
 
-			private int m_i;
+			private readonly int m_i;
 		}
 	}
 }

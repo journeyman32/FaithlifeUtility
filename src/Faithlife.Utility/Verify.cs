@@ -16,7 +16,9 @@ namespace Faithlife.Utility
 		/// <exception cref="InvalidOperationException"><paramref name="value"/> is false.</exception>
 		[DebuggerNonUserCode]
 		[AssertionMethod]
-		public static void IsTrue([AssertionCondition(AssertionConditionType.IS_TRUE)] bool value)
+		public static void IsTrue(
+			[AssertionCondition(AssertionConditionType.IS_TRUE)]
+			bool value)
 		{
 			if (!value)
 				throw new InvalidOperationException();
@@ -29,7 +31,9 @@ namespace Faithlife.Utility
 		/// <exception cref="InvalidOperationException"><paramref name="value"/> is true.</exception>
 		[DebuggerNonUserCode]
 		[AssertionMethod]
-		public static void IsFalse([AssertionCondition(AssertionConditionType.IS_FALSE)] bool value)
+		public static void IsFalse(
+			[AssertionCondition(AssertionConditionType.IS_FALSE)]
+			bool value)
 		{
 			if (value)
 				throw new InvalidOperationException();
@@ -42,9 +46,11 @@ namespace Faithlife.Utility
 		/// <exception cref="InvalidOperationException"><paramref name="obj"/> is not null.</exception>
 		[DebuggerNonUserCode]
 		[AssertionMethod]
-		public static void IsNull([AssertionCondition(AssertionConditionType.IS_NULL)] object obj)
+		public static void IsNull(
+			[AssertionCondition(AssertionConditionType.IS_NULL)]
+			object? obj)
 		{
-			if (obj != null)
+			if (obj is not null)
 				throw new InvalidOperationException();
 		}
 
@@ -55,20 +61,19 @@ namespace Faithlife.Utility
 		/// <exception cref="InvalidOperationException"><paramref name="obj"/> is null.</exception>
 		[DebuggerNonUserCode]
 		[AssertionMethod]
-		public static void IsNotNull([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] object obj)
+		public static void IsNotNull(
+			[AssertionCondition(AssertionConditionType.IS_NOT_NULL)]
+			object? obj)
 		{
-			if (obj == null)
+			if (obj is null)
 				throw new InvalidOperationException();
 		}
 
 		/// <summary>
 		/// Throws <see cref="InvalidOperationException" /> if the parameters are not the same object.
 		/// </summary>
-		/// <param name="objA">A parameter to check.</param>
-		/// <param name="objB">A parameter to check.</param>
-		/// <exception cref="InvalidOperationException">The parameters are not the same object.</exception>
 		[DebuggerNonUserCode]
-		public static void AreSame(object objA, object objB)
+		public static void AreSame(object? objA, object? objB)
 		{
 			if (objA != objB)
 				throw new InvalidOperationException();
@@ -77,11 +82,8 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Throws <see cref="InvalidOperationException" /> if the parameters are the same object.
 		/// </summary>
-		/// <param name="objA">A parameter to check.</param>
-		/// <param name="objB">A parameter to check.</param>
-		/// <exception cref="InvalidOperationException">The parameters are the same object.</exception>
 		[DebuggerNonUserCode]
-		public static void AreNotSame(object objA, object objB)
+		public static void AreNotSame(object? objA, object? objB)
 		{
 			if (objA == objB)
 				throw new InvalidOperationException();

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Faithlife.Utility
 		/// <param name="guid">When this method returns, contains the <see cref="Guid"/> equivalent to the GUID
 		/// contained in <paramref name="value"/>, if the conversion succeeded, or Guid.Empty if the conversion failed.</param>
 		/// <returns><c>true</c> if a GUID was successfully parsed; <c>false</c> otherwise.</returns>
-		public static bool TryParse(string value, out Guid guid) => Guid.TryParse(value, out guid);
+		public static bool TryParse(string? value, out Guid guid) => Guid.TryParse(value, out guid);
 
 		/// <summary>
 		/// Converts a GUID to a lowercase string with no dashes.
@@ -32,13 +33,8 @@ namespace Faithlife.Utility
 		/// <param name="value">The string.</param>
 		/// <returns>The GUID.</returns>
 		/// <exception cref="FormatException">The argument is not a valid GUID short string.</exception>
-		public static Guid FromLowerNoDashString(string value)
-		{
-			Guid? guid = TryFromLowerNoDashString(value);
-			if (guid == null)
-				throw new FormatException("The string '{0}' is not a no-dash lowercase GUID.".FormatInvariant(value ?? "(null)"));
-			return guid.Value;
-		}
+		public static Guid FromLowerNoDashString(string value) =>
+			TryFromLowerNoDashString(value) ?? throw new FormatException("The string '{0}' is not a no-dash lowercase GUID.".FormatInvariant(value ?? "(null)"));
 
 		/// <summary>
 		/// Attempts to convert a lowercase, no dashes string to a GUID.
@@ -65,14 +61,12 @@ namespace Faithlife.Utility
 		/// <returns>A UUID derived from the namespace and name.</returns>
 		public static Guid Create(Guid namespaceId, string name, int version)
 		{
-			if (name == null)
+			if (name is null)
 				throw new ArgumentNullException(nameof(name));
 
 			// convert the name to a sequence of octets (as defined by the standard or conventions of its namespace) (step 3)
 			// ASSUME: UTF-8 encoding is always appropriate
-			byte[] nameBytes = Encoding.UTF8.GetBytes(name);
-
-			return Create(namespaceId, nameBytes, version);
+			return Create(namespaceId, Encoding.UTF8.GetBytes(name), version);
 		}
 
 		/// <summary>
@@ -91,23 +85,25 @@ namespace Faithlife.Utility
 		/// <param name="version">The version number of the UUID to create; this value must be either
 		/// 3 (for MD5 hashing) or 5 (for SHA-1 hashing).</param>
 		/// <returns>A UUID derived from the namespace and name.</returns>
+		[SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "Per spec.")]
+		[SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "Per spec.")]
 		public static Guid Create(Guid namespaceId, byte[] nameBytes, int version)
 		{
 			if (version != 3 && version != 5)
 				throw new ArgumentOutOfRangeException(nameof(version), "version must be either 3 or 5.");
 
 			// convert the namespace UUID to network order (step 3)
-			byte[] namespaceBytes = namespaceId.ToByteArray();
+			var namespaceBytes = namespaceId.ToByteArray();
 			SwapByteOrder(namespaceBytes);
 
 			// compute the hash of the namespace ID concatenated with the name (step 4)
-			byte[] data = namespaceBytes.Concat(nameBytes).ToArray();
+			var data = namespaceBytes.Concat(nameBytes).ToArray();
 			byte[] hash;
-			using (HashAlgorithm algorithm = version == 3 ? (HashAlgorithm) MD5.Create() : SHA1.Create())
+			using (var algorithm = version == 3 ? (HashAlgorithm) MD5.Create() : SHA1.Create())
 				hash = algorithm.ComputeHash(data);
 
 			// most bytes from the hash are copied straight to the bytes of the new GUID (steps 5-7, 9, 11-12)
-			byte[] newGuid = new byte[16];
+			var newGuid = new byte[16];
 			Array.Copy(hash, 0, newGuid, 0, 16);
 
 			// set the four most significant bits (bits 12 through 15) of the time_hi_and_version field to the appropriate 4-bit version number from Section 4.1.3 (step 8)
@@ -147,7 +143,7 @@ namespace Faithlife.Utility
 
 		private static void SwapBytes(byte[] guid, int left, int right)
 		{
-			byte temp = guid[left];
+			var temp = guid[left];
 			guid[left] = guid[right];
 			guid[right] = temp;
 		}

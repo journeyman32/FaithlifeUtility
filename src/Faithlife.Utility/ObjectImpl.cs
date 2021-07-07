@@ -1,10 +1,12 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Faithlife.Utility
 {
 	/// <summary>
 	/// Provides methods for manipulating objects.
 	/// </summary>
+	[SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "Legacy.")]
 	public static class ObjectImpl
 	{
 		/// <summary>
@@ -13,12 +15,12 @@ namespace Faithlife.Utility
 		/// <param name="left">The left item.</param>
 		/// <param name="right">The right item.</param>
 		/// <returns>True if the items are equal.</returns>
-		public static bool OperatorEquality<T>(T left, T right)
+		public static bool OperatorEquality<T>(T? left, T? right)
 			where T : class, IEquatable<T>
 		{
-			if (object.ReferenceEquals(left, right))
+			if (ReferenceEquals(left, right))
 				return true;
-			else if (object.ReferenceEquals(left, null) || object.ReferenceEquals(right, null))
+			else if (left is null || right is null)
 				return false;
 			else
 				return left.Equals(right);
@@ -30,12 +32,12 @@ namespace Faithlife.Utility
 		/// <param name="left">The left item.</param>
 		/// <param name="right">The right item.</param>
 		/// <returns>True if the items are not equal.</returns>
-		public static bool OperatorInequality<T>(T left, T right)
+		public static bool OperatorInequality<T>(T? left, T? right)
 			where T : class, IEquatable<T>
 		{
-			if (object.ReferenceEquals(left, right))
+			if (ReferenceEquals(left, right))
 				return false;
-			else if (object.ReferenceEquals(left, null) || object.ReferenceEquals(right, null))
+			else if (left is null || right is null)
 				return true;
 			else
 				return !left.Equals(right);

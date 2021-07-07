@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace Faithlife.Utility
 	/// the wrapped stream so that inheritors can override this class as they would <see cref="Stream"/>, e.g. override Read and get
 	/// correct behavior for ReadAsync and CopyToAsync.
 	/// </summary>
+	[SuppressMessage("Naming", "CA1710:Identifiers should have correct suffix", Justification = "Legacy.")]
 	public abstract class WrappingStreamBase : Stream
 	{
 		/// <summary>
@@ -71,7 +73,7 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Asynchronously reads a sequence of bytes from the current stream, advances the position within the stream by the number of bytes read, and monitors cancellation requests.
 		/// </summary>
-		public override abstract Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
+		public abstract override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
 
 		/// <summary>
 		/// Gets or sets a value, in milliseconds, that determines how long the stream will attempt to read before timing out.
@@ -87,7 +89,7 @@ namespace Faithlife.Utility
 		/// Sets the position within the current stream.
 		/// </summary>
 		/// <param name="offset">A byte offset relative to the <paramref name="origin"/> parameter.</param>
-		/// <param name="origin">A value of type <see cref="T:System.IO.SeekOrigin"/> indicating the reference point used to obtain the new position.</param>
+		/// <param name="origin">A value of type <see cref="SeekOrigin"/> indicating the reference point used to obtain the new position.</param>
 		/// <returns>The new position within the current stream.</returns>
 		public override long Seek(long offset, SeekOrigin origin) => WrappedStream.Seek(offset, origin);
 
@@ -101,7 +103,7 @@ namespace Faithlife.Utility
 		/// Writes a sequence of bytes to the current stream and advances the current position
 		/// within this stream by the number of bytes written.
 		/// </summary>
-		public override abstract Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
+		public abstract override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
 
 		/// <summary>
 		/// Gets or sets a value, in milliseconds, that determines how long the stream will attempt to write before timing out.
@@ -113,9 +115,8 @@ namespace Faithlife.Utility
 			set => WrappedStream.WriteTimeout = value;
 		}
 
-#if !NETSTANDARD1_4
+		/// <summary>Closes the current stream and releases any resources (such as sockets and file handles) associated with the current stream. Instead of calling this method, ensure that the stream is properly disposed.</summary>
 		public sealed override void Close() => base.Close();
-#endif
 
 		/// <summary>
 		/// Gets the wrapped stream.
@@ -126,7 +127,7 @@ namespace Faithlife.Utility
 			get
 			{
 				ThrowIfDisposed();
-				return m_wrappedStream;
+				return m_wrappedStream!;
 			}
 		}
 
@@ -159,11 +160,11 @@ namespace Faithlife.Utility
 		protected void ThrowIfDisposed()
 		{
 			// throws an ObjectDisposedException if this object has been disposed
-			if (m_wrappedStream == null)
+			if (m_wrappedStream is null)
 				throw new ObjectDisposedException(GetType().Name);
 		}
 
-		Stream m_wrappedStream;
-		readonly Ownership m_ownership;
+		private Stream? m_wrappedStream;
+		private readonly Ownership m_ownership;
 	}
 }

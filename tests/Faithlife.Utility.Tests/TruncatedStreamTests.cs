@@ -20,19 +20,19 @@ namespace Faithlife.Utility.Tests
 		[TearDown]
 		public void TearDown()
 		{
-			m_stream.Dispose();
+			m_stream!.Dispose();
 		}
 
 		[Test]
 		public void BadConstructorArguments()
 		{
-			Assert.Throws<ArgumentNullException>(() => new TruncatedStream(null, 5, Ownership.None));
+			Assert.Throws<ArgumentNullException>(() => new TruncatedStream(null!, 5, Ownership.None));
 		}
 
 		[Test]
 		public void Length()
 		{
-			using (TruncatedStream stream = CreateTruncatedStream(5))
+			using (var stream = CreateTruncatedStream(5))
 			{
 				Assert.AreEqual(5, stream.Length);
 			}
@@ -41,11 +41,11 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void Seek()
 		{
-			using (TruncatedStream stream = CreateTruncatedStream(5))
+			using (var stream = CreateTruncatedStream(5))
 			{
 				Assert.AreEqual(2, stream.Seek(2, SeekOrigin.Begin));
 				Assert.AreEqual(2, stream.Position);
-				Assert.AreEqual(2, m_stream.Position);
+				Assert.AreEqual(2, m_stream!.Position);
 
 				Assert.AreEqual(3, stream.Seek(1, SeekOrigin.Current));
 				Assert.AreEqual(3, stream.Position);
@@ -60,9 +60,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void Read()
 		{
-			using (TruncatedStream stream = CreateTruncatedStream(5))
+			using (var stream = CreateTruncatedStream(5))
 			{
-				byte[] buffer = new byte[16];
+				var buffer = new byte[16];
 				Assert.AreEqual(5, stream.Read(buffer, 0, buffer.Length));
 				CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, buffer);
 			}
@@ -71,9 +71,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public async Task ReadAsync()
 		{
-			using (TruncatedStream stream = CreateTruncatedStream(5))
+			using (var stream = CreateTruncatedStream(5))
 			{
-				byte[] buffer = new byte[16];
+				var buffer = new byte[16];
 				Assert.AreEqual(5, await stream.ReadAsync(buffer, 0, buffer.Length));
 				CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, buffer);
 			}
@@ -82,9 +82,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void CopyTo()
 		{
-			using (TruncatedStream stream = CreateTruncatedStream(5))
+			using (var stream = CreateTruncatedStream(5))
 			{
-				byte[] buffer = new byte[16];
+				var buffer = new byte[16];
 				var destination = new MemoryStream(buffer);
 				stream.CopyTo(destination);
 				CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, buffer);
@@ -94,9 +94,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public async Task CopyToAsync()
 		{
-			using (TruncatedStream stream = CreateTruncatedStream(5))
+			using (var stream = CreateTruncatedStream(5))
 			{
-				byte[] buffer = new byte[16];
+				var buffer = new byte[16];
 				var destination = new MemoryStream(buffer);
 				await stream.CopyToAsync(destination);
 				CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, buffer);
@@ -105,10 +105,10 @@ namespace Faithlife.Utility.Tests
 
 		private TruncatedStream CreateTruncatedStream(int length)
 		{
-			return new TruncatedStream(m_stream, length, Ownership.None);
+			return new TruncatedStream(m_stream!, length, Ownership.None);
 		}
 
-		byte[] m_buffer;
-		Stream m_stream;
+		private byte[]? m_buffer;
+		private Stream? m_stream;
 	}
 }

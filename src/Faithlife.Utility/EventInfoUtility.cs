@@ -19,17 +19,17 @@ namespace Faithlife.Utility
 		/// <returns>A Scope that unsubscribes from the event when disposed.</returns>
 		public static Scope WeakSubscribe<TSource, TTarget>(
 			this EventInfo<TSource, EventHandler> info,
-			TSource source, TTarget target, Action<TTarget, object, EventArgs> action)
-				where TTarget : class
+			TSource source, TTarget target, Action<TTarget, object?, EventArgs> action)
+			where TTarget : class
 		{
-			WeakReference weakTarget = new WeakReference(target, false);
+			var weakTarget = new WeakReference(target, false);
 
-			EventHandler handler = null;
+			EventHandler handler = null!;
 			handler =
 				(s, e) =>
 				{
-					TTarget t = (TTarget) weakTarget.Target;
-					if (t != null)
+					var t = (TTarget?) weakTarget.Target;
+					if (t is not null)
 						action(t, s, e);
 					else
 						info.RemoveHandler(source, handler);
@@ -51,18 +51,18 @@ namespace Faithlife.Utility
 		public static Scope WeakSubscribe<TSource, TTarget, TEventArgs>(
 			this EventInfo<TSource, EventHandler<TEventArgs>> info,
 			TSource source, TTarget target,
-			Action<TTarget, object, TEventArgs> action)
-				where TTarget : class
-				where TEventArgs : EventArgs
+			Action<TTarget, object?, TEventArgs> action)
+			where TTarget : class
+			where TEventArgs : EventArgs
 		{
-			WeakReference weakTarget = new WeakReference(target, false);
+			var weakTarget = new WeakReference(target, false);
 
-			EventHandler<TEventArgs> handler = null;
+			EventHandler<TEventArgs> handler = null!;
 			handler =
 				(s, e) =>
 				{
-					TTarget t = (TTarget) weakTarget.Target;
-					if (t != null)
+					var t = (TTarget?) weakTarget.Target;
+					if (t is not null)
 						action(t, s, e);
 					else
 						info.RemoveHandler(source, handler);

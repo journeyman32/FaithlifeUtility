@@ -11,6 +11,7 @@ namespace Faithlife.Utility
 	/// <remarks>This class is thread-safe. Null disposables are legal and ignored. Objects cannot be
 	/// added to the collection after it has been disposed. The collection cannot be enumerated.</remarks>
 	[SuppressMessage("Microsoft.Design", "CA1010:CollectionsShouldImplementGenericInterface", Justification = "Collection initialization syntax.")]
+	[SuppressMessage("Naming", "CA1710:Identifiers should have correct suffix", Justification = "Legacy.")]
 	public sealed class Disposables : IDisposable, IEnumerable
 	{
 		/// <summary>
@@ -19,17 +20,17 @@ namespace Faithlife.Utility
 		public Disposables()
 		{
 			m_lock = new object();
-			m_list = new List<IDisposable>();
+			m_list = new List<IDisposable?>();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Disposables"/> class.
 		/// </summary>
 		/// <param name="disposables">The initial disposables.</param>
-		public Disposables(IEnumerable<IDisposable> disposables)
+		public Disposables(IEnumerable<IDisposable?> disposables)
 		{
 			m_lock = new object();
-			m_list = new List<IDisposable>(disposables);
+			m_list = new List<IDisposable?>(disposables);
 		}
 
 		/// <summary>
@@ -37,11 +38,11 @@ namespace Faithlife.Utility
 		/// </summary>
 		/// <param name="disposable">The disposable.</param>
 		/// <exception cref="System.ObjectDisposedException">Illegal to add after Dispose.</exception>
-		public void Add(IDisposable disposable)
+		public void Add(IDisposable? disposable)
 		{
 			lock (m_lock)
 			{
-				if (m_list == null)
+				if (m_list is null)
 					throw new ObjectDisposedException("Illegal to add after Dispose.");
 
 				m_list.Add(disposable);
@@ -53,9 +54,9 @@ namespace Faithlife.Utility
 		/// </summary>
 		/// <param name="disposables">The disposables.</param>
 		/// <exception cref="System.ObjectDisposedException">AddRange called after Dispose.</exception>
-		public void AddRange(IEnumerable<IDisposable> disposables)
+		public void AddRange(IEnumerable<IDisposable?> disposables)
 		{
-			foreach (IDisposable disposable in disposables)
+			foreach (var disposable in disposables)
 				Add(disposable);
 		}
 
@@ -64,17 +65,17 @@ namespace Faithlife.Utility
 		/// </summary>
 		public void Dispose()
 		{
-			List<IDisposable> list;
+			List<IDisposable?>? list;
 			lock (m_lock)
 			{
 				list = m_list;
 				m_list = null;
 			}
 
-			if (list != null)
+			if (list is not null)
 			{
-				int count = list.Count;
-				for (int index = count - 1; index >= 0; index--)
+				var count = list.Count;
+				for (var index = count - 1; index >= 0; index--)
 					list[index]?.Dispose();
 			}
 		}
@@ -84,7 +85,7 @@ namespace Faithlife.Utility
 		/// </summary>
 		IEnumerator IEnumerable.GetEnumerator() => throw new NotSupportedException("IEnumerable.GetEnumerator implemented only for collection initialization syntax.");
 
-		readonly object m_lock;
-		List<IDisposable> m_list;
+		private readonly object m_lock;
+		private List<IDisposable?>? m_list;
 	}
 }

@@ -67,7 +67,7 @@ namespace Faithlife.Utility
 		/// many bytes are not currently available, or zero (0) if the end of the stream has been reached.</returns>
 		public override int Read(byte[] buffer, int offset, int count)
 		{
-			if (buffer == null)
+			if (buffer is null)
 				throw new ArgumentNullException(nameof(buffer));
 			if (offset < 0)
 				throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be negative.");
@@ -76,7 +76,7 @@ namespace Faithlife.Utility
 			if (offset + count > buffer.Length)
 				throw new ArgumentException("Offset and count extend past the end of the buffer.");
 
-			int actualByteCount = (int) Math.Min(count, m_length - m_position);
+			var actualByteCount = (int) Math.Min(count, m_length - m_position);
 			if (actualByteCount <= 0)
 				return 0;
 
@@ -95,7 +95,7 @@ namespace Faithlife.Utility
 		/// <remarks>The bytes are not actually stored and will be read as zeroes.</remarks>
 		public override void Write(byte[] buffer, int offset, int count)
 		{
-			if (buffer == null)
+			if (buffer is null)
 				throw new ArgumentNullException(nameof(buffer));
 			if (offset < 0)
 				throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be negative.");
@@ -104,7 +104,7 @@ namespace Faithlife.Utility
 			if (offset + count > buffer.Length)
 				throw new ArgumentException("Offset and count extend past the end of the buffer.");
 
-			long newPosition = m_position + count;
+			var newPosition = m_position + count;
 			if (newPosition < 0)
 				throw new IOException("Stream exceeded the maximum length.");
 
@@ -118,30 +118,18 @@ namespace Faithlife.Utility
 		/// Sets the position within the current stream.
 		/// </summary>
 		/// <param name="offset">A byte offset relative to the <paramref name="origin"/> parameter.</param>
-		/// <param name="origin">A value of type <see cref="T:System.IO.SeekOrigin"/> indicating the reference point
+		/// <param name="origin">A value of type <see cref="SeekOrigin"/> indicating the reference point
 		/// used to obtain the new position.</param>
 		/// <returns>The new position within the current stream.</returns>
 		public override long Seek(long offset, SeekOrigin origin)
 		{
-			long newPosition;
-
-			switch (origin)
+			var newPosition = origin switch
 			{
-			case SeekOrigin.Begin:
-				newPosition = offset;
-				break;
-
-			case SeekOrigin.Current:
-				newPosition = m_position + offset;
-				break;
-
-			case SeekOrigin.End:
-				newPosition = m_length + offset;
-				break;
-
-			default:
-				throw new ArgumentException("Invalid seek origin.", nameof(origin));
-			}
+				SeekOrigin.Begin => offset,
+				SeekOrigin.Current => m_position + offset,
+				SeekOrigin.End => m_length + offset,
+				_ => throw new ArgumentException("Invalid seek origin.", nameof(origin)),
+			};
 
 			if (newPosition < 0)
 				throw new IOException("Cannot seek before begin.");
@@ -175,7 +163,7 @@ namespace Faithlife.Utility
 				m_position = value;
 		}
 
-		long m_position;
-		long m_length;
+		private long m_position;
+		private long m_length;
 	}
 }

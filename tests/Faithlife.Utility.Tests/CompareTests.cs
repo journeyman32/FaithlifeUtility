@@ -9,8 +9,8 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void CompareToTest()
 		{
-			MyComparable left = new MyComparable(1);
-			MyComparable right = new MyComparable(2);
+			var left = new MyComparable(1);
+			var right = new MyComparable(2);
 			Assert.IsTrue(left.CompareTo(right) < 0);
 			Assert.IsTrue(left.CompareTo(left) == 0);
 			Assert.IsTrue(right.CompareTo(left) > 0);
@@ -25,44 +25,44 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void EqualsTest()
 		{
-			MyComparable left = new MyComparable(1);
-			MyComparable right = new MyComparable(2);
-			MyComparable left2 = new MyComparable(1);
+			var left = new MyComparable(1);
+			var right = new MyComparable(2);
+			var left2 = new MyComparable(1);
 			Assert.IsFalse(left.Equals(right));
 			Assert.IsTrue(left.Equals(left));
 			Assert.IsFalse(right.Equals(left));
 			Assert.IsTrue(left.Equals(left2));
 			Assert.IsFalse(left.Equals(null));
-			Assert.IsFalse(((object) left).Equals(right));
+			Assert.IsFalse(((object) left!).Equals(right));
 			Assert.IsTrue(((object) left).Equals(left));
 			Assert.IsFalse(((object) right).Equals(left));
 			Assert.IsTrue(((object) left).Equals(left2));
 			Assert.IsFalse(((object) left).Equals(null));
 		}
 
-		class MyComparable : IComparable<MyComparable>, IComparable, IEquatable<MyComparable>
+		private class MyComparable : IComparable<MyComparable>, IComparable, IEquatable<MyComparable>
 		{
 			public MyComparable(int n)
 			{
 				m_n = n;
 			}
 
-			public int CompareTo(MyComparable other)
+			public int CompareTo(MyComparable? other)
 			{
 				return other == null ? 1 : m_n.CompareTo(other.m_n);
 			}
 
-			int IComparable.CompareTo(object obj)
+			int IComparable.CompareTo(object? obj)
 			{
 				return ComparableImpl.CompareToObject(this, obj);
 			}
 
-			public bool Equals(MyComparable other)
+			public bool Equals(MyComparable? other)
 			{
 				return other == null ? false : m_n == other.m_n;
 			}
 
-			public override bool Equals(object obj)
+			public override bool Equals(object? obj)
 			{
 				return obj is MyComparable && Equals((MyComparable) obj);
 			}
@@ -72,7 +72,7 @@ namespace Faithlife.Utility.Tests
 				return m_n;
 			}
 
-			int m_n;
+			private readonly int m_n;
 		}
 	}
 }

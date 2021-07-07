@@ -42,12 +42,7 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// The ISO 8601 format string.
 		/// </summary>
-#if !MAC
 		public const string Iso8601Format = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'";
-#else
-		// Workaround for http://bugzilla.novell.com/show_bug.cgi?id=403409
-		public const string Iso8601Format = "yyyy-MM-ddTHH:mm:ssZ";
-#endif
 
 		/// <summary>
 		/// The number of DateTime ticks in one second.
@@ -99,6 +94,6 @@ namespace Faithlife.Utility
 		/// </summary>
 		public static DateTime? SpecifyUtc(this DateTime? dateTime) => dateTime?.SpecifyUtc();
 
-		private static readonly DateTime s_epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		private static readonly DateTime s_epoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 	}
 }

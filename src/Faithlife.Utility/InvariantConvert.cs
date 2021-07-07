@@ -16,7 +16,7 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
 		/// </summary>
-		public static bool? TryParseBoolean(string text) => bool.TryParse(text, out var value) ? value : default(bool?);
+		public static bool? TryParseBoolean(string? text) => bool.TryParse(text, out var value) ? value : default(bool?);
 
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
@@ -33,28 +33,30 @@ namespace Faithlife.Utility
 			if (value == 0.0 && BitConverter.DoubleToInt64Bits(value) == BitConverter.DoubleToInt64Bits(-0.0))
 				return "-0";
 
-			return value.ToString("R", CultureInfo.InvariantCulture);
+			return value.ToString("G17", CultureInfo.InvariantCulture);
 		}
 
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
 		/// </summary>
-		public static double? TryParseDouble(string text)
+		public static double? TryParseDouble(string? text)
 		{
 			if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
 			{
 				// XmlConvert.ToDouble supports negative zero
-				if (value == 0.0 && text.TrimStart()[0] == '-')
+				if (value == 0.0 && text!.TrimStart()[0] == '-')
 					return -0.0;
 
 				return value;
 			}
 
-			// XmlConvert.ToString uses INF
-			if (text == "INF")
+			// XmlConvert.ToString uses INF; .NET 5.0 is case-insensitive
+			if (text == "INF" || string.Equals(text, "infinity", StringComparison.OrdinalIgnoreCase))
 				return double.PositiveInfinity;
-			if (text == "-INF")
+			if (text == "-INF" || string.Equals(text, "-infinity", StringComparison.OrdinalIgnoreCase))
 				return double.NegativeInfinity;
+			if (string.Equals(text, "nan", StringComparison.OrdinalIgnoreCase))
+				return double.NaN;
 
 			return default(double?);
 		}
@@ -73,7 +75,7 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
 		/// </summary>
-		public static int? TryParseInt32(string text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : default(int?);
+		public static int? TryParseInt32(string? text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : default(int?);
 
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
@@ -89,7 +91,7 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
 		/// </summary>
-		public static long? TryParseInt64(string text) => long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : default(long?);
+		public static long? TryParseInt64(string? text) => long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : default(long?);
 
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
@@ -105,7 +107,7 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
 		/// </summary>
-		public static TimeSpan? TryParseTimeSpan(string text) => TimeSpan.TryParseExact(text, "c", CultureInfo.InvariantCulture, out var value) ? value : default(TimeSpan?);
+		public static TimeSpan? TryParseTimeSpan(string? text) => TimeSpan.TryParseExact(text, "c", CultureInfo.InvariantCulture, out var value) ? value : default(TimeSpan?);
 
 		/// <summary>
 		/// Converts the string to a value using the invariant culture.
@@ -116,24 +118,16 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Converts the value to a string using the invariant culture.
 		/// </summary>
-		public static string ToInvariantString(object value)
-		{
-			switch (value)
+		public static string ToInvariantString(object value) =>
+			value switch
 			{
-			case bool val:
-				return val.ToInvariantString();
-			case double val:
-				return val.ToInvariantString();
-			case int val:
-				return val.ToInvariantString();
-			case long val:
-				return val.ToInvariantString();
-			case TimeSpan val:
-				return val.ToInvariantString();
-			default:
-				return Convert.ToString(value, CultureInfo.InvariantCulture);
-			}
-		}
+				bool val => val.ToInvariantString(),
+				double val => val.ToInvariantString(),
+				int val => val.ToInvariantString(),
+				long val => val.ToInvariantString(),
+				TimeSpan val => val.ToInvariantString(),
+				_ => Convert.ToString(value, CultureInfo.InvariantCulture)!,
+			};
 
 		private static T ThrowFormatExceptionIfNull<T>(T? result, string text)
 			where T : struct

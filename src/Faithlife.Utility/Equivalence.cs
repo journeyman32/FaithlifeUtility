@@ -15,9 +15,9 @@ namespace Faithlife.Utility
 		/// <typeparam name="T">The object type.</typeparam>
 		/// <param name="left">The left object.</param>
 		/// <param name="right">The right object.</param>
-		/// <returns>True if the objects are equivalent.</returns>
-		public static bool AreEquivalent<T>(T left, T right) where T : IHasEquivalence<T>
-			=> left == null ? right == null : left.IsEquivalentTo(right);
+		public static bool AreEquivalent<T>(T? left, T? right)
+			where T : IHasEquivalence<T>
+			=> left is null ? right is null : left.IsEquivalentTo(right);
 
 		/// <summary>
 		/// True if the sequences are equivalent.
@@ -26,15 +26,17 @@ namespace Faithlife.Utility
 		/// <param name="left">The left sequence.</param>
 		/// <param name="right">The right sequence.</param>
 		/// <returns>True if the sequence are equivalent.</returns>
-		public static bool AreSequencesEquivalent<T>(IEnumerable<T> left, IEnumerable<T> right) where T : IHasEquivalence<T>
-			=> left == null ? right == null : right != null && left.SequenceEquivalent(right);
+		public static bool AreSequencesEquivalent<T>(IEnumerable<T>? left, IEnumerable<T>? right)
+			where T : IHasEquivalence<T>
+			=> left is null ? right is null : right is not null && left.SequenceEquivalent(right);
 
 		/// <summary>
 		/// Returns an equality comparer that calls IHasEquivalence.IsEquivalentTo.
 		/// </summary>
 		/// <typeparam name="T">The object type.</typeparam>
 		/// <returns>The equality comparer.</returns>
-		public static IEqualityComparer<T> GetEqualityComparer<T>() where T : IHasEquivalence<T>
+		public static IEqualityComparer<T> GetEqualityComparer<T>()
+			where T : IHasEquivalence<T>
 			=> new EquivalenceComparer<T, T>();
 
 		/// <summary>
@@ -43,7 +45,8 @@ namespace Faithlife.Utility
 		/// <typeparam name="TDerived">The object type.</typeparam>
 		/// <typeparam name="TBase">The base type that implements IHasEquivalence.</typeparam>
 		/// <returns>The equality comparer.</returns>
-		public static IEqualityComparer<TDerived> GetEqualityComparer<TDerived, TBase>() where TDerived : TBase, IHasEquivalence<TBase>
+		public static IEqualityComparer<TDerived> GetEqualityComparer<TDerived, TBase>()
+			where TDerived : TBase, IHasEquivalence<TBase>
 			=> new EquivalenceComparer<TDerived, TBase>();
 
 		/// <summary>
@@ -72,23 +75,24 @@ namespace Faithlife.Utility
 		/// <typeparam name="T">The object type.</typeparam>
 		/// <param name="source">The sequence.</param>
 		/// <param name="other">The other sequence.</param>
-		/// <returns>True if the sequences are equivalent.</returns>
-		public static bool SequenceEquivalent<T>(this IEnumerable<T> source, IEnumerable<T> other) where T : IHasEquivalence<T>
+		public static bool SequenceEquivalent<T>(this IEnumerable<T> source, IEnumerable<T> other)
+			where T : IHasEquivalence<T>
 			=> source.SequenceEqual(other, GetEqualityComparer<T>());
 
 		private static class EquivalenceComparerCache<T>
 		{
-			public static readonly IEqualityComparer<T> Instance = CreateInstance();
+			public static readonly IEqualityComparer<T>? Instance = CreateInstance();
 
-			private static IEqualityComparer<T> CreateInstance()
+			private static IEqualityComparer<T>? CreateInstance()
 			{
-				Type type = typeof(T);
+				var type = typeof(T);
 				do
 				{
 					if (typeof(IHasEquivalence<>).MakeGenericType(type).IsAssignableFrom(typeof(T)))
-						return (IEqualityComparer<T>) Activator.CreateInstance(typeof(EquivalenceComparer<,>).MakeGenericType(typeof(T), type));
+						return (IEqualityComparer<T>) Activator.CreateInstance(typeof(EquivalenceComparer<,>).MakeGenericType(typeof(T), type))!;
 					type = type.GetBaseType();
-				} while (type != null);
+				}
+				while (type is not null);
 
 				return null;
 			}
@@ -97,7 +101,7 @@ namespace Faithlife.Utility
 		private sealed class EquivalenceComparer<TDerived, TBase> : EqualityComparer<TDerived>
 			where TDerived : TBase, IHasEquivalence<TBase>
 		{
-			public override bool Equals(TDerived left, TDerived right) => left == null ? right == null : left.IsEquivalentTo(right);
+			public override bool Equals(TDerived? left, TDerived? right) => left?.IsEquivalentTo(right) ?? right is null;
 
 			public override int GetHashCode(TDerived value) => throw new NotImplementedException();
 		}

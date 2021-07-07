@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Faithlife.Utility
@@ -10,13 +11,17 @@ namespace Faithlife.Utility
 	/// The priority queue is sorted so that the smallest item is removed from the queue first.
 	/// </summary>
 	/// <typeparam name="T">The type of data to be sorted in the priority queue.</typeparam>
+	[SuppressMessage("Design", "CA1010:Generic interface should also be implemented", Justification = "Legacy.")]
+	[SuppressMessage("Naming", "CA1710:Identifiers should have correct suffix", Justification = "Legacy.")]
+	[SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "Legacy.")]
 	public sealed class PriorityQueue<T> : ICollection, IEnumerable<T>
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PriorityQueue{T}"/> class that is empty, has the default initial capacity,
-		/// and is sorted according to the default <see cref="Comparer{T}"/> for the type of the data. 
+		/// and is sorted according to the default <see cref="Comparer{T}"/> for the type of the data.
 		/// </summary>
-		public PriorityQueue() : this(0, null)
+		public PriorityQueue()
+			: this(0, null)
 		{
 		}
 
@@ -25,18 +30,20 @@ namespace Faithlife.Utility
 		/// and is sorted according to the default <see cref="Comparer{T}"/> for the type of the data.
 		/// </summary>
 		/// <param name="capacity">The initial capacity.</param>
-		public PriorityQueue(int capacity) : this(capacity, null)
+		public PriorityQueue(int capacity)
+			: this(capacity, null)
 		{
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PriorityQueue{T}"/> class that is empty, has the default initial capacity,
-		/// and is sorted according to the specified <see cref="IComparer{T}"/>. 
+		/// and is sorted according to the specified <see cref="IComparer{T}"/>.
 		/// </summary>
 		/// <param name="comparer">The <see cref="IComparer{T}"/> implementation to use when comparing items.<br/>
 		/// -or-<br/>
 		/// a null reference to use the default <see cref="Comparer{T}"/> for the type of the data.</param>
-		public PriorityQueue(IComparer<T> comparer) : this(0, comparer)
+		public PriorityQueue(IComparer<T>? comparer)
+			: this(0, comparer)
 		{
 		}
 
@@ -48,13 +55,13 @@ namespace Faithlife.Utility
 		/// <param name="comparer">The <see cref="IComparer{T}"/> implementation to use when comparing items.<br/>
 		/// -or-<br/>
 		/// a null reference to use the default <see cref="Comparer{T}"/> for the type of the data.</param>
-		public PriorityQueue(int capacity, IComparer<T> comparer)
+		public PriorityQueue(int capacity, IComparer<T>? comparer)
 		{
 			if (capacity < 0)
 				throw new ArgumentOutOfRangeException(nameof(capacity), "The parameter must be a non-negative number.");
 
 			m_comparer = comparer ?? Comparer<T>.Default;
-			m_array = s_emptyArray;
+			m_array = Array.Empty<T>();
 			if (capacity > 0)
 				SetCapacity(capacity);
 		}
@@ -93,7 +100,7 @@ namespace Faithlife.Utility
 				throw new InvalidOperationException("The queue is empty.");
 
 			// remove the first item and return it
-			T item = m_array[0];
+			var item = m_array[0];
 			RemoveAt(0);
 			return item;
 		}
@@ -133,7 +140,7 @@ namespace Faithlife.Utility
 		/// <param name="item">The item to remove.</param>
 		public void Remove(T item)
 		{
-			for (int index = 0; index < m_size; index++)
+			for (var index = 0; index < m_size; index++)
 			{
 				if (m_comparer.Compare(m_array[index], item) == 0)
 				{
@@ -155,7 +162,7 @@ namespace Faithlife.Utility
 			CollectionImpl.CheckCopyToParameters(array, index, m_size);
 
 			// copy each item to the destination array
-			foreach (T item in this)
+			foreach (var item in this)
 				array[index++] = item;
 		}
 
@@ -205,7 +212,7 @@ namespace Faithlife.Utility
 			try
 			{
 				// copy each item to the destination array
-				foreach (T item in this)
+				foreach (var item in this)
 					array.SetValue(item, index++);
 			}
 			catch (InvalidCastException)
@@ -229,7 +236,7 @@ namespace Faithlife.Utility
 		{
 			get
 			{
-				if (m_syncRoot == null)
+				if (m_syncRoot is null)
 					Interlocked.CompareExchange(ref m_syncRoot, new object(), null);
 
 				return m_syncRoot;
@@ -257,7 +264,7 @@ namespace Faithlife.Utility
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
 			// make a copy of the current data
-			PriorityQueue<T> copy = new PriorityQueue<T>(this);
+			var copy = new PriorityQueue<T>(this);
 
 			// return each item, in order
 			while (copy.Count > 0)
@@ -280,7 +287,7 @@ namespace Faithlife.Utility
 			if (desiredSize > m_array.Length)
 			{
 				// not big enough; resize (to either two times the current size or the current size plus four, whichever is larger)
-				int newCapacity = Math.Max(m_array.Length * 2, m_array.Length + 4);
+				var newCapacity = Math.Max(m_array.Length * 2, m_array.Length + 4);
 				SetCapacity(newCapacity);
 			}
 		}
@@ -291,7 +298,7 @@ namespace Faithlife.Utility
 			if (capacity > 0)
 			{
 				// allocate new array and copy any values across to it
-				T[] newData = new T[capacity];
+				var newData = new T[capacity];
 				if (m_size > 0)
 					Array.Copy(m_array, newData, m_size);
 				m_array = newData;
@@ -299,7 +306,7 @@ namespace Faithlife.Utility
 			else
 			{
 				// use empty array
-				m_array = s_emptyArray;
+				m_array = Array.Empty<T>();
 			}
 		}
 
@@ -309,7 +316,7 @@ namespace Faithlife.Utility
 			// replace the item with the last item
 			m_size--;
 			m_array[index] = m_array[m_size];
-			m_array[m_size] = default(T);
+			m_array[m_size] = default!;
 
 			// restore the heap order
 			SiftDownHeap(index);
@@ -322,10 +329,10 @@ namespace Faithlife.Utility
 			if (index > 0)
 			{
 				// get the item to be moved
-				T item = m_array[index];
+				var item = m_array[index];
 
 				// keep replacing the item's parent with it (while it is less than the parent)
-				int parentIndex = (index - 1) / 2;
+				var parentIndex = (index - 1) / 2;
 				while (index > 0 && m_comparer.Compare(m_array[parentIndex], item) > 0)
 				{
 					m_array[index] = m_array[parentIndex];
@@ -342,17 +349,17 @@ namespace Faithlife.Utility
 		private void SiftDownHeap(int index)
 		{
 			// we can't move items at the bottom of the heap down any further
-			int maxIndex = m_size / 2 - 1;
+			var maxIndex = m_size / 2 - 1;
 			if (index <= maxIndex)
 			{
 				// get the item to be moved
-				T item = m_array[index];
+				var item = m_array[index];
 
 				// walk down the heap until we get to the bottom level
 				while (index <= maxIndex)
 				{
 					// find the smaller child
-					int childIndex = index * 2 + 1;
+					var childIndex = index * 2 + 1;
 					if (childIndex < m_size - 1 && m_comparer.Compare(m_array[childIndex], m_array[childIndex + 1]) > 0)
 						childIndex++;
 
@@ -370,11 +377,9 @@ namespace Faithlife.Utility
 			}
 		}
 
-		readonly IComparer<T> m_comparer;
-		T[] m_array;
-		int m_size;
-		object m_syncRoot;
-
-		static readonly T[] s_emptyArray = new T[0];
+		private readonly IComparer<T> m_comparer;
+		private T[] m_array;
+		private int m_size;
+		private object? m_syncRoot;
 	}
 }

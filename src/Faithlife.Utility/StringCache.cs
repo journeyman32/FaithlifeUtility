@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Faithlife.Utility
 {
@@ -17,20 +19,18 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Constructs a new instance of the <see cref="StringCache"/> class.
 		/// </summary>
-		public StringCache()
-		{
-			m_cache = new Dictionary<string, string>();
-		}
+		public StringCache() => m_cache = new(StringComparer.Ordinal);
 
 		/// <summary>
 		/// Gets an existing string from the cache, or adds it if it's not currently in the cache.
 		/// </summary>
 		/// <param name="value">The string value to look up.</param>
 		/// <returns>The unique cached instance of a <see cref="string"/> that is equal to <paramref name="value"/>.</returns>
-		public string GetOrAdd(string value)
+		[return: NotNullIfNotNull("value")]
+		public string? GetOrAdd(string? value)
 		{
 			// check for trivial cases
-			if (value == null)
+			if (value is null)
 				return null;
 			if (value.Length == 0)
 				return "";
@@ -40,10 +40,18 @@ namespace Faithlife.Utility
 				return cachedString;
 
 			// otherwise, cache this string (it becomes the canonical instance)
+#if NETSTANDARD2_0
 			m_cache.Add(value, value);
+#else
+			m_cache.Add(value);
+#endif
 			return value;
 		}
 
-		readonly Dictionary<string, string> m_cache;
+#if NETSTANDARD2_0
+		private readonly Dictionary<string, string> m_cache;
+#else
+		private readonly HashSet<string> m_cache;
+#endif
 	}
 }

@@ -26,22 +26,36 @@ namespace Faithlife.Utility
 		{
 			if (category == UnicodeCategory.UppercaseLetter || category == UnicodeCategory.LowercaseLetter || category == UnicodeCategory.TitlecaseLetter ||
 				category == UnicodeCategory.ModifierLetter || category == UnicodeCategory.OtherLetter)
+			{
 				return UnicodeCharacterClass.Letter;
+			}
 			else if (category == UnicodeCategory.NonSpacingMark || category == UnicodeCategory.SpacingCombiningMark || category == UnicodeCategory.EnclosingMark)
+			{
 				return UnicodeCharacterClass.Mark;
+			}
 			else if (category == UnicodeCategory.DecimalDigitNumber || category == UnicodeCategory.LetterNumber || category == UnicodeCategory.OtherNumber)
+			{
 				return UnicodeCharacterClass.Number;
+			}
 			else if (category == UnicodeCategory.SpaceSeparator || category == UnicodeCategory.LineSeparator || category == UnicodeCategory.ParagraphSeparator)
+			{
 				return UnicodeCharacterClass.Separator;
+			}
 			else if (category == UnicodeCategory.ConnectorPunctuation || category == UnicodeCategory.DashPunctuation || category == UnicodeCategory.OpenPunctuation ||
 				category == UnicodeCategory.ClosePunctuation || category == UnicodeCategory.InitialQuotePunctuation || category == UnicodeCategory.FinalQuotePunctuation ||
 				category == UnicodeCategory.OtherPunctuation)
+			{
 				return UnicodeCharacterClass.Punctuation;
+			}
 			else if (category == UnicodeCategory.MathSymbol || category == UnicodeCategory.CurrencySymbol || category == UnicodeCategory.ModifierSymbol ||
 				category == UnicodeCategory.OtherSymbol)
+			{
 				return UnicodeCharacterClass.Symbol;
+			}
 			else
+			{
 				return UnicodeCharacterClass.Other;
+			}
 		}
 
 		/// <summary>
@@ -61,7 +75,7 @@ namespace Faithlife.Utility
 		public static int GetCharacterLength(StringBuilder stringBuilder, int index)
 		{
 			// check arguments
-			if (stringBuilder == null)
+			if (stringBuilder is null)
 				throw new ArgumentNullException(nameof(stringBuilder));
 			if (index < 0 || index >= stringBuilder.Length)
 				throw new ArgumentOutOfRangeException(nameof(index));
@@ -81,13 +95,13 @@ namespace Faithlife.Utility
 		public static int GetCodePoint(StringBuilder stringBuilder, int index)
 		{
 			// check arguments
-			if (stringBuilder == null)
+			if (stringBuilder is null)
 				throw new ArgumentNullException(nameof(stringBuilder));
 			if (index < 0 || index >= stringBuilder.Length)
 				throw new ArgumentOutOfRangeException(nameof(index));
 
 			// convert surrogate pair to supplementary codepoint, or simply return BMP codepoint
-			char ch = stringBuilder[index];
+			var ch = stringBuilder[index];
 			if (char.IsSurrogate(ch))
 				return char.ConvertToUtf32(ch, index < stringBuilder.Length - 1 ? stringBuilder[index + 1] : '\0');
 			else

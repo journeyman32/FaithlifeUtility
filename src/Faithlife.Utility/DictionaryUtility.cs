@@ -14,17 +14,17 @@ namespace Faithlife.Utility
 		/// Returns true if there is a one-to-one relationship between every key-value pair.
 		/// </summary>
 		/// <remarks>Uses the default equality comparer for TValue if none is specified.</remarks>
-		public static bool AreEqual<TKey, TValue>(IReadOnlyDictionary<TKey, TValue> left, IReadOnlyDictionary<TKey, TValue> right, IEqualityComparer<TValue> comparer = null)
+		public static bool AreEqual<TKey, TValue>(IReadOnlyDictionary<TKey, TValue>? left, IReadOnlyDictionary<TKey, TValue>? right, IEqualityComparer<TValue>? comparer = null)
 		{
-			comparer = comparer ?? EqualityComparer<TValue>.Default;
+			comparer ??= EqualityComparer<TValue>.Default;
 
 			if (left == right)
 				return true;
 
-			if (left == null || right == null || left.Count != right.Count)
+			if (left is null || right is null || left.Count != right.Count)
 				return false;
 
-			foreach (KeyValuePair<TKey, TValue> pair in left)
+			foreach (var pair in left)
 			{
 				if (!right.TryGetValue(pair.Key, out var value) || !comparer.Equals(pair.Value, value))
 					return false;
@@ -40,7 +40,8 @@ namespace Faithlife.Utility
 		/// <typeparam name="TValue">The type of the value.</typeparam>
 		/// <param name="dictionary">The dictionary to wrap.</param>
 		/// <returns>The read-only dictionary.</returns>
-		public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary);
+		public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+			where TKey : notnull => new(dictionary);
 
 		/// <summary>
 		/// Represents the sequence of key-value pairs as a <see cref="IReadOnlyDictionary{TKey,TValue}"/>.
@@ -55,6 +56,7 @@ namespace Faithlife.Utility
 		/// This method is useful for forcing evaluation of a potentially lazy sequence while retaining reasonable
 		/// performance for sequences that are already an <see cref="IReadOnlyDictionary{TKey,TValue}"/> or <see cref="IDictionary{TKey,TValue}"/>.</remarks>
 		public static IReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
+			where TKey : notnull
 		{
 			return keyValuePairs as IReadOnlyDictionary<TKey, TValue> ??
 				(keyValuePairs is IDictionary<TKey, TValue> dictionary ?
@@ -68,7 +70,8 @@ namespace Faithlife.Utility
 		/// <param name="dictionary">The dictionary.</param>
 		/// <param name="key">The key.</param>
 		/// <returns>The new or existing value.</returns>
-		public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key) where TValue : new()
+		public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+			where TValue : new()
 		{
 			if (dictionary.TryGetValue(key, out var value))
 				return value;
@@ -103,7 +106,14 @@ namespace Faithlife.Utility
 		/// <param name="dictionary">The dictionary.</param>
 		/// <param name="key">The key.</param>
 		/// <returns>The value, or a default value.</returns>
-		public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
+#if !NETSTANDARD2_0
+		[Obsolete("Use System.Collections.Generic.CollectionExtensions.GetValueOrDefault instead (available in netcoreapp2.0, netstandard2.1)")]
+#endif
+		public static TValue? GetValueOrDefault<TKey, TValue>(
+#if NETSTANDARD2_0
+			this
+#endif
+			IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
 		{
 			// specification for IDictionary<> requires that the returned value be the default if it fails
 			dictionary.TryGetValue(key, out var value);
@@ -119,8 +129,15 @@ namespace Faithlife.Utility
 		/// <param name="key">The key.</param>
 		/// <param name="defaultValue">The default value.</param>
 		/// <returns>The value, or a default value.</returns>
-		public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
-			=> dictionary.TryGetValue(key, out var value) ? value : defaultValue;
+#if !NETSTANDARD2_0
+		[Obsolete("Use System.Collections.Generic.CollectionExtensions.GetValueOrDefault instead (available in netcoreapp2.0, netstandard2.1)")]
+#endif
+		public static TValue GetValueOrDefault<TKey, TValue>(
+#if NETSTANDARD2_0
+			this
+#endif
+			IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
+				=> dictionary.TryGetValue(key, out var value) ? value : defaultValue;
 
 		/// <summary>
 		/// Gets a value from the dictionary, returning the generated default value if it is missing.
@@ -142,7 +159,7 @@ namespace Faithlife.Utility
 		/// <param name="key">The key.</param>
 		/// <param name="value">The value.</param>
 		/// <returns>The key value pair.</returns>
-		public static KeyValuePair<TKey, TValue> CreateKeyValuePair<TKey, TValue>(TKey key, TValue value) => new KeyValuePair<TKey, TValue>(key, value);
+		public static KeyValuePair<TKey, TValue> CreateKeyValuePair<TKey, TValue>(TKey key, TValue value) => new(key, value);
 
 		/// <summary>
 		/// Tries to add a value to the dictionary.
@@ -155,7 +172,14 @@ namespace Faithlife.Utility
 		/// <returns>True if successful, i.e. the key was not already in the dictionary.</returns>
 		/// <remarks>Unfortunately, there is no more efficient way to do this on an IDictionary than to check
 		/// ContainsKey before calling Add.</remarks>
-		public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+#if !NETSTANDARD2_0
+		[Obsolete("Use System.Collections.Generic.CollectionExtensions.TryAdd instead (available in netcoreapp2.0, netstandard2.1)")]
+#endif
+		public static bool TryAdd<TKey, TValue>(
+#if NETSTANDARD2_0
+			this
+#endif
+			IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
 		{
 			if (dictionary.ContainsKey(key))
 				return false;

@@ -26,7 +26,7 @@ namespace Faithlife.Utility.Tests
 
 			try
 			{
-				bool parsed = InvariantConvert.ParseBoolean(before);
+				var parsed = InvariantConvert.ParseBoolean(before);
 				Assert.AreEqual((bool) value, parsed);
 			}
 			catch (FormatException)
@@ -41,7 +41,7 @@ namespace Faithlife.Utility.Tests
 		[TestCase("3", 3.0, "3")]
 		[TestCase("0", 0.0, "0")]
 		[TestCase("-3", -3.0, "-3")]
-		[TestCase("4.94065645841247E-324", double.Epsilon, "4.94065645841247E-324")]
+		[TestCase("4.9406564584124654E-324", double.Epsilon, "4.9406564584124654E-324")]
 		[TestCase("1.7976931348623157E+308", double.MaxValue, "1.7976931348623157E+308")]
 		[TestCase("-1.7976931348623157E+308", double.MinValue, "-1.7976931348623157E+308")]
 		[TestCase("+0006.0221412927000e23", 6.0221412927E+23, "6.0221412927E+23")]
@@ -62,16 +62,16 @@ namespace Faithlife.Utility.Tests
 		[TestCase("3.", 3.0, "3")]
 		[TestCase("-0", 0.0, "0")]
 		[TestCase("-0", -0.0, "-0")]
-		[TestCase("-infinity", null, null)]
-		[TestCase("infinity", null, null)]
-		[TestCase("nan", null, null)]
+		[TestCase("-infinity", double.NegativeInfinity, "-Infinity")]
+		[TestCase("infinity", double.PositiveInfinity, "Infinity")]
+		[TestCase("nan", double.NaN, "NaN")]
 		public void TestDouble(string before, object value, string after)
 		{
 			Assert.AreEqual((double?) value, InvariantConvert.TryParseDouble(before));
 
 			try
 			{
-				double parsed = InvariantConvert.ParseDouble(before);
+				var parsed = InvariantConvert.ParseDouble(before);
 				Assert.AreEqual((double) value, parsed);
 			}
 			catch (FormatException)
@@ -105,7 +105,7 @@ namespace Faithlife.Utility.Tests
 
 			try
 			{
-				int parsed = InvariantConvert.ParseInt32(before);
+				var parsed = InvariantConvert.ParseInt32(before);
 				Assert.AreEqual((int) value, parsed);
 			}
 			catch (FormatException)
@@ -139,7 +139,7 @@ namespace Faithlife.Utility.Tests
 
 			try
 			{
-				long parsed = InvariantConvert.ParseInt64(before);
+				var parsed = InvariantConvert.ParseInt64(before);
 				Assert.AreEqual((long) value, parsed);
 			}
 			catch (FormatException)
@@ -176,14 +176,14 @@ namespace Faithlife.Utility.Tests
 		[TestCase("-10675199.02:48:05.4775809", null)]
 		public void TestTimeSpan(string before, string after)
 		{
-			TimeSpan? value = after != null ? TimeSpan.Parse(after) : default(TimeSpan?);
+			var value = after != null ? TimeSpan.Parse(after) : default(TimeSpan?);
 
 			Assert.AreEqual(value, InvariantConvert.TryParseTimeSpan(before));
 
 			try
 			{
-				TimeSpan parsed = InvariantConvert.ParseTimeSpan(before);
-				Assert.AreEqual(value.Value, parsed);
+				var parsed = InvariantConvert.ParseTimeSpan(before);
+				Assert.AreEqual(value!.Value, parsed);
 			}
 			catch (FormatException)
 			{
@@ -191,7 +191,7 @@ namespace Faithlife.Utility.Tests
 			}
 
 			if (after != null)
-				Assert.AreEqual(after, value.Value.ToInvariantString());
+				Assert.AreEqual(after, value!.Value.ToInvariantString());
 		}
 
 		[TestCase(null, "")]

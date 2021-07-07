@@ -17,11 +17,9 @@ namespace Faithlife.Utility
 		/// <returns>An array of all bytes read from the stream.</returns>
 		public static byte[] ReadAllBytes(this Stream stream)
 		{
-			using (MemoryStream streamMemory = new MemoryStream())
-			{
-				stream.CopyTo(streamMemory);
-				return streamMemory.ToArray();
-			}
+			using var streamMemory = new MemoryStream();
+			stream.CopyTo(streamMemory);
+			return streamMemory.ToArray();
 		}
 
 		/// <summary>
@@ -30,13 +28,11 @@ namespace Faithlife.Utility
 		/// <param name="stream">The stream.</param>
 		/// <param name="cancellationToken">The cancellation token.</param>
 		/// <returns>An array of all bytes read from the stream.</returns>
-		public static async Task<byte[]> ReadAllBytesAsync(this Stream stream, CancellationToken cancellationToken = default(CancellationToken))
+		public static async Task<byte[]> ReadAllBytesAsync(this Stream stream, CancellationToken cancellationToken = default)
 		{
-			using (MemoryStream streamMemory = new MemoryStream())
-			{
-				await stream.CopyToAsync(streamMemory, 81920, cancellationToken);
-				return streamMemory.ToArray();
-			}
+			using var streamMemory = new MemoryStream();
+			await stream.CopyToAsync(streamMemory, 81920, cancellationToken).ConfigureAwait(false);
+			return streamMemory.ToArray();
 		}
 
 		/// <summary>
@@ -52,9 +48,9 @@ namespace Faithlife.Utility
 		public static int ReadBlock(this Stream stream, byte[] buffer, int offset, int count)
 		{
 			// check arguments
-			if (stream == null)
+			if (stream is null)
 				throw new ArgumentNullException(nameof(stream));
-			if (buffer == null)
+			if (buffer is null)
 				throw new ArgumentNullException(nameof(buffer));
 			if (offset < 0 || offset > buffer.Length)
 				throw new ArgumentOutOfRangeException(nameof(offset));
@@ -62,11 +58,11 @@ namespace Faithlife.Utility
 				throw new ArgumentOutOfRangeException(nameof(count));
 
 			// track total bytes read
-			int totalBytesRead = 0;
+			var totalBytesRead = 0;
 			while (count > 0)
 			{
 				// read data
-				int bytesRead = stream.Read(buffer, offset, count);
+				var bytesRead = stream.Read(buffer, offset, count);
 
 				// check for end of stream
 				if (bytesRead == 0)
@@ -91,12 +87,12 @@ namespace Faithlife.Utility
 		/// <param name="cancellationToken">The cancellation token.</param>
 		/// <remarks>Unlike Stream.ReadAsync, this method will not return fewer bytes than requested
 		/// unless the end of the stream is reached.</remarks>
-		public static async Task<int> ReadBlockAsync(this Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken))
+		public static async Task<int> ReadBlockAsync(this Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default)
 		{
 			// check arguments
-			if (stream == null)
+			if (stream is null)
 				throw new ArgumentNullException(nameof(stream));
-			if (buffer == null)
+			if (buffer is null)
 				throw new ArgumentNullException(nameof(buffer));
 			if (offset < 0 || offset > buffer.Length)
 				throw new ArgumentOutOfRangeException(nameof(offset));
@@ -104,11 +100,15 @@ namespace Faithlife.Utility
 				throw new ArgumentOutOfRangeException(nameof(count));
 
 			// track total bytes read
-			int totalBytesRead = 0;
+			var totalBytesRead = 0;
 			while (count > 0)
 			{
 				// read data
-				int bytesRead = await stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+#if NETSTANDARD2_0
+				var bytesRead = await stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+#else
+				var bytesRead = await stream.ReadAsync(buffer.AsMemory(offset, count), cancellationToken).ConfigureAwait(false);
+#endif
 
 				// check for end of stream
 				if (bytesRead == 0)
@@ -132,7 +132,7 @@ namespace Faithlife.Utility
 		{
 			if (count < 0)
 				throw new ArgumentOutOfRangeException(nameof(count));
-			byte[] buffer = new byte[count];
+			var buffer = new byte[count];
 			ReadExactly(stream, buffer, 0, count);
 			return buffer;
 		}
@@ -144,11 +144,11 @@ namespace Faithlife.Utility
 		/// <param name="count">The count of bytes to read.</param>
 		/// <param name="cancellationToken">The cancellation token.</param>
 		/// <returns>A new byte array containing the data read from the stream.</returns>
-		public static async Task<byte[]> ReadExactlyAsync(this Stream stream, int count, CancellationToken cancellationToken = default(CancellationToken))
+		public static async Task<byte[]> ReadExactlyAsync(this Stream stream, int count, CancellationToken cancellationToken = default)
 		{
 			if (count < 0)
 				throw new ArgumentOutOfRangeException(nameof(count));
-			byte[] buffer = new byte[count];
+			var buffer = new byte[count];
 			await ReadExactlyAsync(stream, buffer, 0, count, cancellationToken).ConfigureAwait(false);
 			return buffer;
 		}
@@ -176,7 +176,7 @@ namespace Faithlife.Utility
 		/// <param name="offset">The offset within the buffer at which data is first written.</param>
 		/// <param name="count">The count of bytes to read.</param>
 		/// <param name="cancellationToken">The cancellation token.</param>
-		public static async Task ReadExactlyAsync(this Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken))
+		public static async Task ReadExactlyAsync(this Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default)
 		{
 			if (await stream.ReadBlockAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false) != count)
 				throw new EndOfStreamException();
@@ -202,7 +202,7 @@ namespace Faithlife.Utility
 				stream = new RebasedStream(stream, ownership);
 			}
 
-			if (length != null)
+			if (length.HasValue)
 				stream = new TruncatedStream(stream, length.Value, ownership);
 
 			return stream;

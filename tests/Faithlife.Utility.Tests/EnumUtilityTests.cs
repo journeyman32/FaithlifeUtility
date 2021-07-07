@@ -1,6 +1,4 @@
 using System;
-using System.Text.RegularExpressions;
-
 using NUnit.Framework;
 
 namespace Faithlife.Utility.Tests
@@ -21,11 +19,9 @@ namespace Faithlife.Utility.Tests
 		[Test]
 		public void TryParse()
 		{
-			DayOfWeek dow;
-			Assert.IsTrue(EnumUtility.TryParse("Thursday", out dow));
+			Assert.IsTrue(EnumUtility.TryParse("Thursday", out DayOfWeek dow));
 			Assert.AreEqual(DayOfWeek.Thursday, dow);
-			StringSplitOptions sso;
-			Assert.IsFalse(EnumUtility.TryParse("Thursday", out sso));
+			Assert.IsFalse(EnumUtility.TryParse("Thursday", out StringSplitOptions sso));
 			Assert.IsFalse(EnumUtility.TryParse("removeemptyentries", out sso));
 			Assert.IsFalse(EnumUtility.TryParse("removeemptyentries", CaseSensitivity.MatchCase, out sso));
 			Assert.IsTrue(EnumUtility.TryParse("removeemptyentries", CaseSensitivity.IgnoreCase, out sso));
@@ -48,7 +44,6 @@ namespace Faithlife.Utility.Tests
 			CollectionAssert.AreEqual(
 				new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday },
 				EnumUtility.GetValues<DayOfWeek>());
-			CollectionAssert.AreEqual(new[] { StringSplitOptions.None, StringSplitOptions.RemoveEmptyEntries }, EnumUtility.GetValues<StringSplitOptions>());
 		}
 	}
 }

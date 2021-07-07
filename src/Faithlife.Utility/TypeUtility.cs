@@ -21,8 +21,8 @@ namespace Faithlife.Utility
 		/// </summary>
 		/// <param name="type">The type.</param>
 		/// <param name="parentType">The parent type.</param>
-		/// <returns>true if parentType and type represent the same type, or if type is in the inheritance hierarchy of parent type, 
-		/// or if type is an interface that parentType implements, or if parent type is a generic type parameter and type represents 
+		/// <returns>true if parentType and type represent the same type, or if type is in the inheritance hierarchy of parent type,
+		/// or if type is an interface that parentType implements, or if parent type is a generic type parameter and type represents
 		/// one of the constraints of parent type. false if none of these conditions are true, or if parent type is null.</returns>
 		public static bool IsAssignableFrom(this Type type, Type parentType) => type.GetTypeInfo().IsAssignableFrom(parentType.GetTypeInfo());
 
@@ -65,7 +65,7 @@ namespace Faithlife.Utility
 		public static bool IsValueType(this Type type) => type.GetTypeInfo().IsValueType;
 
 		/// <summary>
-		/// Gets the System.Reflection.Assembly in which the specified type is declared. For generic types, 
+		/// Gets the System.Reflection.Assembly in which the specified type is declared. For generic types,
 		/// gets the System.Reflection.Assembly in which the generic type is defined.
 		/// </summary>
 		/// <returns>
@@ -79,17 +79,17 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Gets the type from which the specified Type directly inherits.
 		/// </summary>
-		public static Type GetBaseType(this Type type) => type.GetTypeInfo().BaseType;
+		public static Type? GetBaseType(this Type type) => type.GetTypeInfo().BaseType;
 
 		/// <summary>
 		/// Gets the default constructor, or null if there isn't one.
 		/// </summary>
-		public static ConstructorInfo GetDefaultConstructor(this Type type) => type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(x => x.GetParameters().Length == 0);
+		public static ConstructorInfo? GetDefaultConstructor(this Type type) => type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(x => x.GetParameters().Length == 0);
 
 		/// <summary>
 		/// Gets the constructor with the specified parameter types, or null if there isn't one.
 		/// </summary>
-		public static ConstructorInfo GetConstructor(this Type type, Type[] types)
+		public static ConstructorInfo? GetConstructor(this Type type, Type[] types)
 			=> type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(x => x.IsPublic && EnumerableUtility.AreEqual(x.GetParameters().Select(p => p.ParameterType), types));
 
 		/// <summary>
@@ -102,13 +102,13 @@ namespace Faithlife.Utility
 		/// <summary>
 		/// Gets the properties.
 		/// </summary>
-		public static PropertyInfo[] GetProperties(this Type type) => type.GetRuntimeProperties().Where(x => x.GetMethod != null).ToArray();
+		public static PropertyInfo[] GetProperties(this Type type) => type.GetRuntimeProperties().Where(x => x.GetMethod is not null).ToArray();
 
 		/// <summary>
 		/// Gets the property.
 		/// </summary>
-		public static PropertyInfo GetProperty(this Type type, string propertyName, bool ignoreCase = false)
-			=> type.GetRuntimeProperties().FirstOrDefault(x => x.GetMethod != null && string.Equals(x.Name, propertyName, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
+		public static PropertyInfo? GetProperty(this Type type, string propertyName, bool ignoreCase = false)
+			=> type.GetRuntimeProperties().FirstOrDefault(x => x.GetMethod is not null && string.Equals(x.Name, propertyName, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
 
 		/// <summary>
 		/// Gets the custom attributes.

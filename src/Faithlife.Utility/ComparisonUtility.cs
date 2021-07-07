@@ -30,7 +30,7 @@ namespace Faithlife.Utility
 		/// <typeparam name="T">The type to compare.</typeparam>
 		/// <param name="comparer">The compare delegate.</param>
 		/// <returns>The comparer.</returns>
-		public static Comparer<T> CreateComparer<T>(Func<T, T, int> comparer) => new GenericComparer<T>(comparer);
+		public static Comparer<T> CreateComparer<T>(Func<T?, T?, int> comparer) => new GenericComparer<T>(comparer);
 
 		/// <summary>
 		/// Creates a comparer from a delegate.
@@ -38,7 +38,7 @@ namespace Faithlife.Utility
 		/// <typeparam name="T">The type to compare.</typeparam>
 		/// <param name="comparers">The compare delegates.</param>
 		/// <returns>The comparer.</returns>
-		public static Comparer<T> CreateComparer<T>(params Func<T, T, int>[] comparers) => new GenericComparer<T>(CreateChainedComparison(comparers));
+		public static Comparer<T> CreateComparer<T>(params Func<T?, T?, int>[] comparers) => new GenericComparer<T>(CreateChainedComparison(comparers));
 
 		/// <summary>
 		/// Executes a chained comparison between two objects.
@@ -71,7 +71,7 @@ namespace Faithlife.Utility
 
 		private static void VerifyComparers<T>(Func<T, T, int>[] comparers)
 		{
-			if (comparers == null)
+			if (comparers is null)
 				throw new ArgumentNullException(nameof(comparers));
 			if (comparers.Length == 0)
 				throw new ArgumentException("Must supply at least one comparer; use Comparer<T>.Default for a default comparer.", nameof(comparers));
@@ -81,7 +81,7 @@ namespace Faithlife.Utility
 		{
 			foreach (var comparer in comparers)
 			{
-				int nCompare = comparer(left, right);
+				var nCompare = comparer(left, right);
 				if (nCompare != 0)
 					return nCompare;
 			}

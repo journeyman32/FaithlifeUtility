@@ -1,4 +1,3 @@
-using System;
 using NUnit.Framework;
 
 namespace Faithlife.Utility.Tests
@@ -6,13 +5,6 @@ namespace Faithlife.Utility.Tests
 	[TestFixture]
 	public class ObjectUtilityTests
 	{
-		[Test]
-		public void GetHashCodeProblem()
-		{
-			const string str = null;
-			Assert.Throws<NullReferenceException>(() => str.GetHashCode());
-		}
-
 		[Test]
 		public void GetHashCodeNull()
 		{
